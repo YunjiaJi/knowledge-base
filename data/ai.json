@@ -2,28 +2,35 @@
   {
     "category": "ai",
     "type": "Python / 张量操作",
-    "title": "Python切片：[:, 0:1, 2:3]",
+    "title": "三维张量 [B,T,D] 与 Python 切片：predict_pose / predict_yaw",
     "summary": "对三维张量按各维度选取范围；冒号表示该维度取完整范围，不表示无限。",
     "tags": [
       "Python",
       "Tensor",
-      "切片"
+      "切片",
+      "维度",
+      "Shape",
+      "Batch",
+      "Time Steps"
     ],
     "sections": [
       {
-        "heading": "逐维解释",
-        "body": "假设张量形状为 (B,T,C)，[:, 0:1, 2:3] 表示：第0维全部保留；第1维取索引0（保留长度1）；第2维取索引2（保留长度1）。"
+        "heading": "一、基础代码含义与原理",
+        "body": "Tensor（张量）是多维数组；shape=[B,T,D] 中 B=Batch Size（一次处理几组样本）、T=Time Steps（每组几个时间步）、D=Feature Dimension（每步几个特征）。Python索引从0开始；[start:stop]左闭右开，:表示当前维度全取，...表示剩余维度全取。切片0:1保留长度1的轴，直接索引0会消去该轴。五维图像张量常见布局[B,T,C,H,W]：C通道、H高度、W宽度，但实际以代码为准。"
       },
       {
-        "heading": "为什么用0:1而不是0",
-        "body": "0:1会保留该维度，结果仍是三维张量；单独写0通常会压缩该维度。切片右端不包含在范围内。"
+        "heading": "二、真实模型代码或可运行示例",
+        "body": "import torch\npredict_traj=torch.tensor([[[10.,20.,0.5],[11.,21.,0.6],[12.,22.,0.7]]])  # [B=1,T=3,D=3]\npredict_pose=predict_traj[:,0:1,0:2] # [[[10.,20.]]] shape=[1,1,2]\npredict_yaw=predict_traj[:,0:1,2:3]  # [[[0.5]]] shape=[1,1,1]\nimg=torch.zeros(2,20,3,256,256) # [B,T,C,H,W]\ncondition_frames=10\nhistory=img[:,:condition_frames] # [2,10,3,256,256]"
       },
       {
-        "heading": "三维张量 [B,T,D] 与具体例子",
-        "body": "B=Batch Size（批次大小），T=Time Steps（时间步数），D=Feature Dimension（特征维度）。假设 predict_traj.shape=[1,3,3]，三个时间步分别为 [10,20,0.5]、[11,21,0.6]、[12,22,0.7]，最后一维按[x,y,yaw]排列。predict_pose=predict_traj[:,0:1,0:2] 得到 [[[10,20]]]，shape=[1,1,2]；predict_yaw=predict_traj[:,0:1,2:3] 得到 [[[0.5]]]，shape=[1,1,1]。第一个冒号取全部批次，0:1取第0个时间步，0:2取x、y，2:3取yaw。切片右端不包含，保留长度为1的维度。"
+        "heading": "三、代码的完整中文解释",
+        "body": "对于每个批次，从预测轨迹中只取第一个预测时间步；最后一维前两个数作为x、y位置，第三个数作为yaw航向角，并保留批次维和时间维。另一个例子从两组各20帧的RGB视频中分别取前10帧，保留全部颜色通道和空间尺寸。轨迹最后一维按[x,y,yaw]排列需以模型实现核实。"
+      },
+      {
+        "heading": "补充知识、易错点与原有笔记",
+        "body": "逐维解释：假设张量形状为 (B,T,C)，[:, 0:1, 2:3] 表示：第0维全部保留；第1维取索引0（保留长度1）；第2维取索引2（保留长度1）。\n\n为什么用0:1而不是0：0:1会保留该维度，结果仍是三维张量；单独写0通常会压缩该维度。切片右端不包含在范围内。\n\n三维张量 [B,T,D] 与具体例子：B=Batch Size（批次大小），T=Time Steps（时间步数），D=Feature Dimension（特征维度）。假设 predict_traj.shape=[1,3,3]，三个时间步分别为 [10,20,0.5]、[11,21,0.6]、[12,22,0.7]，最后一维按[x,y,yaw]排列。predict_pose=predict_traj[:,0:1,0:2] 得到 [[[10,20]]]，shape=[1,1,2]；predict_yaw=predict_traj[:,0:1,2:3] 得到 [[[0.5]]]，shape=[1,1,1]。第一个冒号取全部批次，0:1取第0个时间步，0:2取x、y，2:3取yaw。切片右端不包含，保留长度为1的维度。\n\n逐维解释：假设张量形状是(B,T,C)：第一个冒号表示所有batch；0:1表示时间维只取索引0并保留长度1；2:3表示特征维只取索引2并保留长度1。\n\n为什么不直接写0和2：切片0:1和2:3会保留维度，结果仍是三维张量；直接索引0或2通常会压缩对应维度。切片右端不包含在范围内。\n\n三个维度：B（Batch Size）表示一次处理的样本组数；T（Time Steps）表示每组的时间位置数量；D（Feature Dimension）表示每个时间位置的特征数量。\n\n轨迹例子：predict_traj.shape=[1,3,3]，每个时间步的3个特征依次是x、y、yaw。predict_pose=predict_traj[:,0:1,0:2]→[1,1,2]；predict_yaw=predict_traj[:,0:1,2:3]→[1,1,1]。这里的x、y、yaw排列来自示例代码推断，具体需以模型定义为准。\n\n原有示例：若 predict_traj 的形状是 (B,T,3)，predict_traj[:,0:1,2:3] 取第一个预测时刻的第3个通道，并保留维度。"
       }
     ],
-    "example": "若 predict_traj 的形状是 (B,T,3)，predict_traj[:,0:1,2:3] 取第一个预测时刻的第3个通道，并保留维度。",
     "related": [
       "PyTorch Tensor",
       "torch.cat()"
@@ -32,7 +39,7 @@
   {
     "category": "ai",
     "type": "PyTorch函数",
-    "title": "torch.cat() 与 dim 参数",
+    "title": "torch.cat() 与 dim：二维和三维张量拼接",
     "summary": "torch.cat() 沿指定的已有维度拼接多个张量；dim决定拼接轴。",
     "tags": [
       "PyTorch",
@@ -40,27 +47,22 @@
     ],
     "sections": [
       {
-        "heading": "基本形式",
-        "body": "torch.cat((tensor1,tensor2,...), dim=1) 将张量沿第1维拼接。除拼接维度外，其他维度大小必须一致。"
+        "heading": "一、基础代码含义与原理",
+        "body": "torch.cat（concatenate）是PyTorch提供的沿已有轴拼接张量的函数；dim是dimension（维度）的关键字参数，不是独立函数。二维张量dim=0通常增加行、dim=1增加列；三维[B,T,D]的dim=1增加时间步。除拼接轴外其他轴长度必须一致。cat不会新增维度，torch.stack才新增维度。"
       },
       {
-        "heading": "与stack的区别",
-        "body": "cat沿已有维度拼接，不增加维度；stack会新增一个维度，再把张量堆叠起来。"
+        "heading": "二、真实模型代码或可运行示例",
+        "body": "import torch\na=torch.tensor([[1,2],[3,4]])\nb0=torch.tensor([[5,6]])\nprint(torch.cat((a,b0),dim=0)) # [[1,2],[3,4],[5,6]], [3,2]\nb1=torch.tensor([[5],[6]])\nprint(torch.cat((a,b1),dim=1)) # [[1,2,5],[3,4,6]], [2,3]\nold=torch.tensor([[[1.,2.],[3.,4.],[5.,6.]]]) # [1,3,2]\nnew=torch.tensor([[[7.,8.]]]) # [1,1,2]\nwindow=torch.cat((old[:,1:,:],new),dim=1) # [[[3,4],[5,6],[7,8]]], [1,3,2]"
       },
       {
-        "heading": "dim=0：沿第0维拼接（二维时增加行）",
-        "body": "import torch; a=torch.tensor([[1,2],[3,4]]); b=torch.tensor([[5,6]]); torch.cat((a,b),dim=0) → [[1,2],[3,4],[5,6]]，形状由[2,2]与[1,2]变成[3,2]。"
+        "heading": "三、代码的完整中文解释",
+        "body": "前两段分别把一行接到矩阵下面、把一列接到矩阵右边。最后一段模拟自动驾驶时序输入更新：删除最旧的时间步[1,2]，保留后两个历史时间步，再把新预测的[7,8]接到时间轴末尾；批次和特征数不变。"
       },
       {
-        "heading": "dim=1：沿第1维拼接（二维时增加列）",
-        "body": "a=torch.tensor([[1,2],[3,4]]); b=torch.tensor([[5],[6]]); torch.cat((a,b),dim=1) → [[1,2,5],[3,4,6]]，形状由[2,2]与[2,1]变成[2,3]。"
-      },
-      {
-        "heading": "三维张量中的dim=1",
-        "body": "如果张量形状是[B,T,D]，dim=1就是时间维，不是普通二维表的列。torch.cat((历史时间片段,预测时间片段),dim=1)会延长时间轴，批次B和特征D必须一致。"
+        "heading": "补充知识、易错点与原有笔记",
+        "body": "基本形式：torch.cat((tensor1,tensor2,...), dim=1) 将张量沿第1维拼接。除拼接维度外，其他维度大小必须一致。\n\n与stack的区别：cat沿已有维度拼接，不增加维度；stack会新增一个维度，再把张量堆叠起来。\n\ndim=0：沿第0维拼接（二维时增加行）：import torch; a=torch.tensor([[1,2],[3,4]]); b=torch.tensor([[5,6]]); torch.cat((a,b),dim=0) → [[1,2],[3,4],[5,6]]，形状由[2,2]与[1,2]变成[3,2]。\n\ndim=1：沿第1维拼接（二维时增加列）：a=torch.tensor([[1,2],[3,4]]); b=torch.tensor([[5],[6]]); torch.cat((a,b),dim=1) → [[1,2,5],[3,4,6]]，形状由[2,2]与[2,1]变成[2,3]。\n\n三维张量中的dim=1：如果张量形状是[B,T,D]，dim=1就是时间维，不是普通二维表的列。torch.cat((历史时间片段,预测时间片段),dim=1)会延长时间轴，批次B和特征D必须一致。\n\n原有示例：torch.cat((pose[:,1:condition_frames], predict_pose), dim=1) 通常表示沿时间维拼接历史片段与新预测位姿。"
       }
     ],
-    "example": "torch.cat((pose[:,1:condition_frames], predict_pose), dim=1) 通常表示沿时间维拼接历史片段与新预测位姿。",
     "related": [
       "Python切片",
       "Tensor维度"
@@ -69,25 +71,32 @@
   {
     "category": "ai",
     "type": "模型机制",
-    "title": "自回归生成（Autoregressive Generation）",
+    "title": "自回归生成与一次性多步预测",
     "summary": "模型把前一步生成结果作为后续输入，逐步产生序列。",
     "tags": [
       "自回归",
       "世界模型",
-      "生成模型"
+      "生成模型",
+      "多步预测",
+      "轨迹生成",
+      "World Model"
     ],
     "sections": [
       {
-        "heading": "基本过程",
-        "body": "给定初始条件，模型生成下一步或一段未来；再把生成结果接回输入，继续生成后续内容。"
+        "heading": "一、基础代码含义与原理",
+        "body": "一次性多步预测（Multi-step Prediction）是在一次调用中给出多个未来时间点；自回归生成（Autoregressive Generation）是把前一次预测结果反馈到下一次模型调用。二者可以同时存在。无真实观测纠正时，误差可能累积；不等同于真实车辆闭环控制。"
       },
       {
-        "heading": "误差累积",
-        "body": "如果后续步骤持续使用模型自己的预测，而不重新输入真实观测，早期误差可能传递并累积。实际程度取决于模型结构、训练方式和反馈机制。"
+        "heading": "二、真实模型代码或可运行示例",
+        "body": "# Epona scripts/test/test_free.py（节选）\nfor t1 in range(0,args.test_video_frames,args.temporal_patch_size):\n    for t2 in range(args.temporal_patch_size):\n        predict_traj,predict_latents=model.step_eval(start_latents,pose,yaw,self_pred_traj=True)\n        predict_pose=predict_traj[:,0:1,0:2]\n        predict_yaw=predict_traj[:,0:1,2:3]\n        pose=torch.cat((pose[:,1:condition_frames,...],predict_pose,predict_pose),dim=1)\n        yaw=torch.cat((yaw[:,1:condition_frames,...],predict_yaw,predict_yaw),dim=1)\n        predict_latents=rearrange(predict_latents,'(b f) h w c -> b f (h w) c',f=1)\n        start_latents=torch.cat((start_latents[:,1:condition_frames,...],predict_latents),dim=1)"
       },
       {
-        "heading": "与一次性多步预测的区别",
-        "body": "一次性多步预测在一次推理中输出多个未来点；自回归预测则通过多轮迭代延长序列。两者不是同一个概念。"
+        "heading": "三、代码的完整中文解释",
+        "body": "模型每轮输出一段未来轨迹和新图像的潜在特征；脚本取轨迹第一个时间步更新运动输入，并把预测latent接回图像历史窗口，重复预测。轨迹一次输出多个未来点，不代表外部循环一次推进多个时间步。这里pose和yaw确实重复拼接了预测值两次。"
+      },
+      {
+        "heading": "补充知识、易错点与原有笔记",
+        "body": "基本过程：给定初始条件，模型生成下一步或一段未来；再把生成结果接回输入，继续生成后续内容。\n\n误差累积：如果后续步骤持续使用模型自己的预测，而不重新输入真实观测，早期误差可能传递并累积。实际程度取决于模型结构、训练方式和反馈机制。\n\n与一次性多步预测的区别：一次性多步预测在一次推理中输出多个未来点；自回归预测则通过多轮迭代延长序列。两者不是同一个概念。\n\n一次性多步预测：给定历史条件，模型一次输出未来N步。它并不自动意味着预测过程中会持续接收新观测；输出长度和推理调用方式要看模型接口。\n\n自回归生成：模型先生成下一步或一个片段，再把生成结果作为后续输入，反复迭代。若没有真实观测纠正，预测误差可能逐步传播。\n\n两者关系：一次性多步预测和自回归执行是不同层次的概念。一个模型可以单次输出多步，也可以在外部滑动窗口循环中反复调用。要结合测试脚本判断实际推理链路。"
       }
     ],
     "related": [
@@ -107,38 +116,22 @@
     ],
     "sections": [
       {
-        "heading": "规则",
-        "body": "range(start, stop)从start开始，到stop之前结束，步长默认1。因此range(3,10)产生3、4、5、6、7、8、9，共7个整数。"
+        "heading": "一、基础代码含义与原理",
+        "body": "range(start,stop,step)是Python内置的整数序列范围，左闭右开；默认step=1。range(3,10)依次产生3、4、5、6、7、8、9，不包含10。range不是时间自动增长的开关，而是由for循环按顺序取值。"
       },
       {
-        "heading": "常见用途",
-        "body": "用于循环索引、批量处理场景编号等。若希望包含10，需要写range(3,11)。"
-      }
-    ],
-    "example": "for scene in range(3, 10): 会依次处理scene=3到scene=9。"
-  },
-  {
-    "category": "ai",
-    "type": "Python与PyTorch",
-    "title": "Python张量切片：[:, 0:1, 2:3]",
-    "summary": "按三维张量的三个轴选取数据；冒号表示该维度全取，不是取到无限。",
-    "tags": [
-      "Python",
-      "Tensor",
-      "切片",
-      "维度"
-    ],
-    "sections": [
-      {
-        "heading": "逐维解释",
-        "body": "假设张量形状是(B,T,C)：第一个冒号表示所有batch；0:1表示时间维只取索引0并保留长度1；2:3表示特征维只取索引2并保留长度1。"
+        "heading": "二、真实模型代码或可运行示例",
+        "body": "for i in range(3,10):\n    print(i) # 依次输出3到9\ncondition_frames=10\nfor j in range(condition_frames):\n    print(j) # 依次输出0到9，对应10帧索引"
       },
       {
-        "heading": "为什么不直接写0和2",
-        "body": "切片0:1和2:3会保留维度，结果仍是三维张量；直接索引0或2通常会压缩对应维度。切片右端不包含在范围内。"
+        "heading": "三、代码的完整中文解释",
+        "body": "第一段循环执行7次；第二段循环执行10次，用于逐一处理历史10帧。变量condition_frames本身仍是10，不会因为循环自动变成11。"
+      },
+      {
+        "heading": "补充知识、易错点与原有笔记",
+        "body": "规则：range(start, stop)从start开始，到stop之前结束，步长默认1。因此range(3,10)产生3、4、5、6、7、8、9，共7个整数。\n\n常见用途：用于循环索引、批量处理场景编号等。若希望包含10，需要写range(3,11)。\n\n原有示例：for scene in range(3, 10): 会依次处理scene=3到scene=9。"
       }
-    ],
-    "example": "predict_traj[:,0:1,2:3] 常用于取第一个预测时刻的Yaw通道，同时保留batch、时间和特征维。"
+    ]
   },
   {
     "category": "ai",
@@ -153,42 +146,20 @@
     ],
     "sections": [
       {
-        "heading": "多返回值解包",
-        "body": "predict_traj, predict_latents = model.step_eval(...)表示函数返回一个可迭代对象（通常是tuple），其中包含两个结果，分别赋给两个变量。变量名由调用者选择。"
+        "heading": "一、基础代码含义与原理",
+        "body": "obj.method(...)是调用对象的方法；model.step_eval不是Python或PyTorch统一内置函数，需要查项目类定义。a,b=f()是序列解包，左侧两个变量分别接收函数返回的两个元素。self_pred_traj=True是布尔型关键字参数，只控制内部逻辑，不决定返回值数量。"
       },
       {
-        "heading": "关键字参数",
-        "body": "self_pred_traj=True是调用时显式传入的布尔参数，用来控制函数内部行为。它并不意味着函数只返回一个或两个值；返回几个值由函数定义和执行路径决定。"
+        "heading": "二、真实模型代码或可运行示例",
+        "body": "# Epona models/model.py（关键逻辑节选）\ndef step_eval(self,latents,rel_pose,rel_yaw,sample_last=True,self_pred_traj=True,traj_only=False):\n    # 先由traj_dit预测predict_traj\n    if self_pred_traj:\n        predict_pose,predict_yaw=predict_traj[:,0:1,0:2],predict_traj[:,0:1,2:3]\n        predict_pose=poses_to_indices(predict_pose,self.pose_x_vocab_size,self.pose_y_vocab_size)\n        predict_yaw=yaws_to_indices(predict_yaw,self.yaw_vocab_size)\n        pose_emb=self.model.get_pose_emb(predict_pose,predict_yaw)\n    # 后续由VisDiT生成predict_latents\n    return predict_traj,predict_latents"
       },
       {
-        "heading": "如何确认",
-        "body": "查看step_eval的函数定义和return语句，才能确定两个返回值的具体含义，以及self_pred_traj=True改变了什么。"
-      }
-    ]
-  },
-  {
-    "category": "ai",
-    "type": "模型机制",
-    "title": "一次性多步预测与自回归生成",
-    "summary": "一次性多步预测在一次模型调用中输出多个未来点；自回归生成把先前预测反馈给模型继续生成。",
-    "tags": [
-      "多步预测",
-      "自回归",
-      "轨迹生成",
-      "World Model"
-    ],
-    "sections": [
-      {
-        "heading": "一次性多步预测",
-        "body": "给定历史条件，模型一次输出未来N步。它并不自动意味着预测过程中会持续接收新观测；输出长度和推理调用方式要看模型接口。"
+        "heading": "三、代码的完整中文解释",
+        "body": "TrajDiT先生成轨迹。打开self_pred_traj时，模型取预测轨迹的第一步位置和航向角，转换为离散索引并构造Pose Embedding，作为视觉生成条件。函数末尾无论如何使用return返回轨迹和latent两个结果（traj_only=True时latent为None）。代码为关键逻辑节选，省略了其他分支与采样语句。"
       },
       {
-        "heading": "自回归生成",
-        "body": "模型先生成下一步或一个片段，再把生成结果作为后续输入，反复迭代。若没有真实观测纠正，预测误差可能逐步传播。"
-      },
-      {
-        "heading": "两者关系",
-        "body": "一次性多步预测和自回归执行是不同层次的概念。一个模型可以单次输出多步，也可以在外部滑动窗口循环中反复调用。要结合测试脚本判断实际推理链路。"
+        "heading": "补充知识、易错点与原有笔记",
+        "body": "多返回值解包：predict_traj, predict_latents = model.step_eval(...)表示函数返回一个可迭代对象（通常是tuple），其中包含两个结果，分别赋给两个变量。变量名由调用者选择。\n\n关键字参数：self_pred_traj=True是调用时显式传入的布尔参数，用来控制函数内部行为。它并不意味着函数只返回一个或两个值；返回几个值由函数定义和执行路径决定。\n\n如何确认：查看step_eval的函数定义和return语句，才能确定两个返回值的具体含义，以及self_pred_traj=True改变了什么。"
       }
     ]
   },
@@ -205,16 +176,20 @@
     ],
     "sections": [
       {
-        "heading": "扩散采样步数",
-        "body": "例如num_sampling_steps=100，通常表示从噪声到生成结果执行100次左右的去噪迭代。它影响生成计算量和生成质量，不等于读取100帧视频。"
+        "heading": "一、基础代码含义与原理",
+        "body": "扩散采样步数（Diffusion Sampling Steps）是模型生成一个样本时的去噪/流采样迭代次数；采样频率（Sampling Frequency，Hz）是物理时间轴上每秒采集多少帧或状态。两者是不同的时间尺度。"
       },
       {
-        "heading": "数据采样频率",
-        "body": "5Hz表示每秒5个时间点，时间间隔0.2s；10Hz表示每秒10个时间点，时间间隔0.1s。它描述真实场景的时间采样。"
+        "heading": "二、真实模型代码或可运行示例",
+        "body": "num_sampling_steps=100 # 生成一次的迭代步数\ndownsample_fps=10 # 数据时间轴每秒10帧（以配置为准）\n# 若某评价数据实际以5Hz采样：\ndt=1/5 # 0.2秒/帧\nhorizon=15*dt # 15个时间间隔对应3秒"
       },
       {
-        "heading": "两者关系",
-        "body": "扩散采样步数影响单个样本的生成过程；数据采样频率影响模型输入/输出的时间分辨率。二者可以同时影响系统表现，但含义不同。"
+        "heading": "三、代码的完整中文解释",
+        "body": "100不表示100帧视频，而是生成过程中的100次采样迭代；10Hz表示每秒10个数据时间点，5Hz表示每秒5个数据时间点。必须区分配置文件中的采样率与某次实验实际评估采样率。"
+      },
+      {
+        "heading": "补充知识、易错点与原有笔记",
+        "body": "扩散采样步数：例如num_sampling_steps=100，通常表示从噪声到生成结果执行100次左右的去噪迭代。它影响生成计算量和生成质量，不等于读取100帧视频。\n\n数据采样频率：5Hz表示每秒5个时间点，时间间隔0.2s；10Hz表示每秒10个时间点，时间间隔0.1s。它描述真实场景的时间采样。\n\n两者关系：扩散采样步数影响单个样本的生成过程；数据采样频率影响模型输入/输出的时间分辨率。二者可以同时影响系统表现，但含义不同。"
       }
     ]
   },
@@ -231,16 +206,20 @@
     ],
     "sections": [
       {
-        "heading": "编码与解码",
-        "body": "Encoder将图像映射到更紧凑的latent表示；模型在latent空间进行预测后，Decoder将latent还原为图像。DCAE在Epona配置中作为图像tokenizer/编解码器组件。"
+        "heading": "一、基础代码含义与原理",
+        "body": "Encoder（编码器）将高维图像映射到latent（潜在表示/潜变量），Decoder（解码器）将latent映射回图像。Tensor（张量）形状由模型结构定义，用户可以自己创建张量，但送入预训练模型时必须满足接口约束。Latent不是RGB图片，而是模型学习到的数值特征，可能保留场景结构、纹理等信息。"
       },
       {
-        "heading": "Temporal-aware Decoder",
-        "body": "配置中add_decoder_temporal=True表示启用带时间建模能力的解码器结构；是否真正加载对应预训练权重，需要检查tokenizer初始化代码、checkpoint路径和load_state_dict逻辑。"
+        "heading": "二、真实模型代码或可运行示例",
+        "body": "# Epona scripts/test/test_free.py（节选）\ncondition_frames=args.condition_frames\nstart_latents=tokenizer.encode_to_z(img[:,:condition_frames])\n# 预测下一帧的latent\npredict_traj,predict_latents=model.step_eval(start_latents,pose,yaw,self_pred_traj=True)\n# 预测latent经过重排后，可送入图像解码方法\nimg_preds=tokenizer.z_to_image(predict_latents_patch,is_video=False)\n# 教学示意：RGB图像[3,512,1024] -> latent[32,16,32]，实际Epona形状需打印验证"
       },
       {
-        "heading": "如何排查视觉失真",
-        "body": "若真实历史帧经过编码再解码仍清晰，而预测latent解码后逐渐失真，问题更可能位于预测模型或自回归链路；若真实帧重建也明显失真，则应先检查编解码器和权重。"
+        "heading": "三、代码的完整中文解释",
+        "body": "先选历史图像，用tokenizer的encode_to_z编码成更紧凑的潜在特征；世界模型预测未来latent；最后用z_to_image把预测特征还原成可看的驾驶场景图像。encode_to_z和z_to_image是项目对象方法，不是Python或Linux内置函数。示意形状不是作者实际张量尺寸。"
+      },
+      {
+        "heading": "补充知识、易错点与原有笔记",
+        "body": "编码与解码：Encoder将图像映射到更紧凑的latent表示；模型在latent空间进行预测后，Decoder将latent还原为图像。DCAE在Epona配置中作为图像tokenizer/编解码器组件。\n\nTemporal-aware Decoder：配置中add_decoder_temporal=True表示启用带时间建模能力的解码器结构；是否真正加载对应预训练权重，需要检查tokenizer初始化代码、checkpoint路径和load_state_dict逻辑。\n\n如何排查视觉失真：若真实历史帧经过编码再解码仍清晰，而预测latent解码后逐渐失真，问题更可能位于预测模型或自回归链路；若真实帧重建也明显失真，则应先检查编解码器和权重。"
       }
     ]
   },
@@ -257,16 +236,20 @@
     ],
     "sections": [
       {
-        "heading": "启动命令",
-        "body": "nohup python -u run_batch.py > batch_logs/batch_console.log 2>&1 < /dev/null & 将程序放到后台运行，标准输出和错误输出都写入日志。-u让Python输出不缓冲，&表示后台执行。"
+        "heading": "一、基础代码含义与原理",
+        "body": "nohup是Unix/Linux命令，允许程序忽略挂断信号；&让shell后台执行；>重定向标准输出，2>&1将标准错误合并到标准输出，-u让Python输出更及时。进程是否持续运行还受环境、资源和系统策略影响。"
       },
       {
-        "heading": "查看状态",
-        "body": "tail -f batch_logs/batch_console.log实时查看日志；ps aux | grep '[r]un_batch.py'检查进程；若只看到启动日志，不足以判断程序已停止，还要结合进程、状态文件和输出文件检查。"
+        "heading": "二、真实模型代码或可运行示例",
+        "body": "nohup python -u run_batch.py > batch_logs/batch_console.log 2>&1 < /dev/null &\nps aux | grep '[r]un_batch.py'\ntail -f batch_logs/batch_console.log"
       },
       {
-        "heading": "tmux缺失",
-        "body": "若系统提示tmux: command not found，说明没有安装tmux；可以使用nohup作为简单替代。"
+        "heading": "三、代码的完整中文解释",
+        "body": "第一行后台运行批处理程序，把正常日志和报错写入文件；第二行查看进程是否存在；第三行实时追踪日志。仅有日志不等于程序仍在运行，需要结合进程状态判断。"
+      },
+      {
+        "heading": "补充知识、易错点与原有笔记",
+        "body": "启动命令：nohup python -u run_batch.py > batch_logs/batch_console.log 2>&1 < /dev/null & 将程序放到后台运行，标准输出和错误输出都写入日志。-u让Python输出不缓冲，&表示后台执行。\n\n查看状态：tail -f batch_logs/batch_console.log实时查看日志；ps aux | grep '[r]un_batch.py'检查进程；若只看到启动日志，不足以判断程序已停止，还要结合进程、状态文件和输出文件检查。\n\ntmux缺失：若系统提示tmux: command not found，说明没有安装tmux；可以使用nohup作为简单替代。"
       }
     ]
   },
@@ -283,41 +266,22 @@
     ],
     "sections": [
       {
-        "heading": "find示例",
-        "body": "find test_videos -maxdepth 3 -name pred_traj.pt：在test_videos下最多向下搜索3层，查找文件名为pred_traj.pt的文件。"
+        "heading": "一、基础代码含义与原理",
+        "body": "find用于按文件名和路径搜索；grep用于按内容搜索；2表示标准错误流，/dev/null是丢弃输出的设备。2>/dev/null只丢弃错误输出，不影响正常结果。"
       },
       {
-        "heading": "grep示例",
-        "body": "grep -RniE 'pattern' path：递归搜索、忽略大小写、显示行号，并使用扩展正则表达式。"
+        "heading": "二、真实模型代码或可运行示例",
+        "body": "find test_videos -maxdepth 3 -name pred_traj.pt 2>/dev/null\ngrep -RniE 'def step_eval|def get_rel_pose' ."
       },
       {
-        "heading": "错误重定向",
-        "body": "2代表标准错误流，/dev/null是丢弃输出的特殊设备；2>/dev/null不会隐藏标准输出。"
+        "heading": "三、代码的完整中文解释",
+        "body": "第一行在test_videos目录内最多向下查找3层，搜索名为pred_traj.pt的文件，并隐藏权限等错误；第二行递归查找项目中step_eval和get_rel_pose的函数定义，忽略大小写并显示行号。"
+      },
+      {
+        "heading": "补充知识、易错点与原有笔记",
+        "body": "find示例：find test_videos -maxdepth 3 -name pred_traj.pt：在test_videos下最多向下搜索3层，查找文件名为pred_traj.pt的文件。\n\ngrep示例：grep -RniE 'pattern' path：递归搜索、忽略大小写、显示行号，并使用扩展正则表达式。\n\n错误重定向：2代表标准错误流，/dev/null是丢弃输出的特殊设备；2>/dev/null不会隐藏标准输出。"
       }
     ]
-  },
-  {
-    "category": "ai",
-    "type": "PyTorch基础",
-    "title": "三维张量 [B,T,D]：Batch、Time、Feature",
-    "summary": "B是批次，T是时间步，D是特征维；理解轨迹张量的切片。",
-    "tags": [
-      "Tensor",
-      "Shape",
-      "Batch",
-      "Time Steps"
-    ],
-    "sections": [
-      {
-        "heading": "三个维度",
-        "body": "B（Batch Size）表示一次处理的样本组数；T（Time Steps）表示每组的时间位置数量；D（Feature Dimension）表示每个时间位置的特征数量。"
-      },
-      {
-        "heading": "轨迹例子",
-        "body": "predict_traj.shape=[1,3,3]，每个时间步的3个特征依次是x、y、yaw。predict_pose=predict_traj[:,0:1,0:2]→[1,1,2]；predict_yaw=predict_traj[:,0:1,2:3]→[1,1,1]。这里的x、y、yaw排列来自示例代码推断，具体需以模型定义为准。"
-      }
-    ],
-    "example": "predict_traj=[[[10,20,0.5],[11,21,0.6],[12,22,0.7]]]；predict_pose=[[[10,20]]]；predict_yaw=[[[0.5]]]。"
   },
   {
     "category": "ai",
@@ -332,16 +296,47 @@
     ],
     "sections": [
       {
-        "heading": "args.condition_frames",
-        "body": "args通常是运行参数对象，点号表示读取其属性。condition_frames=args.condition_frames把运行参数赋给局部变量。配置文件condition_frames=10可能是默认值，运行时是否为10要检查参数解析与覆盖逻辑。"
+        "heading": "一、基础代码含义与原理",
+        "body": "args只是变量名，常作为arguments（参数）对象；args.xxx表示读取对象属性。argparse.ArgumentParser是Python标准库工具；Config.fromfile是项目配置读取方法。图像张量常见[B,T,C,H,W]，img[:,:N]选所有批次前N帧。...表示保留后续维度。N+1每次只是算N加1，不会自动递增。"
       },
       {
-        "heading": "图像编码",
-        "body": "img[:, :condition_frames]取所有批次的前N帧；tokenizer.encode_to_z(...)不是Python/PyTorch内置函数，通常是编码器对象的方法，用来把图像变成latent。"
+        "heading": "二、真实模型代码或可运行示例",
+        "body": "# Epona scripts/test/test_free.py（节选）\ndef add_arguments():\n    args=parser.parse_args()\n    cfg=Config.fromfile(args.config)\n    cfg.merge_from_dict(args.__dict__)\n    return cfg\nargs=add_arguments()\ncondition_frames=args.condition_frames\nstart_latents=tokenizer.encode_to_z(img[:,:condition_frames])\npose_total,yaw_total=get_rel_pose(rot_matrix)\npose=pose_total[:,:condition_frames+1,...]\nyaw=yaw_total[:,:condition_frames+1,...]\n# Epona utils/preprocess.py（节选）\n# poses=torch.cat([poses[:,0:1],poses],dim=1)\n# 然后计算相邻位姿的相对平移与相对旋转"
       },
       {
-        "heading": "运动信息",
-        "body": "get_rel_pose(rot_matrix)不是Python/PyTorch内置函数；其来源和具体计算需查函数定义。pose_total[:, :condition_frames+1, ...]在N=10时取索引0到10共11个时间位置；...保留剩余所有维度。+1不会自行累加，也不是循环。"
+        "heading": "三、代码的完整中文解释",
+        "body": "先解析命令行参数、读取配置文件并合并成最终配置对象；从中读取condition_frames。若实际加载的配置值为10，就编码前10帧图像，同时选取前11个相对位姿和航向角时间位置。get_rel_pose在项目中有明确实现：先复制首帧作为序列起点，再计算相邻位姿变化。模型step_eval接口注释使用t+1长度的运动条件；具体时序对齐需进一步检查evaluate内部。配置文件写10不代表实际运行一定选中它，需核对--config。"
+      },
+      {
+        "heading": "补充知识、易错点与原有笔记",
+        "body": "args.condition_frames：args通常是运行参数对象，点号表示读取其属性。condition_frames=args.condition_frames把运行参数赋给局部变量。配置文件condition_frames=10可能是默认值，运行时是否为10要检查参数解析与覆盖逻辑。\n\n图像编码：img[:, :condition_frames]取所有批次的前N帧；tokenizer.encode_to_z(...)不是Python/PyTorch内置函数，通常是编码器对象的方法，用来把图像变成latent。\n\n运动信息：get_rel_pose(rot_matrix)不是Python/PyTorch内置函数；其来源和具体计算需查函数定义。pose_total[:, :condition_frames+1, ...]在N=10时取索引0到10共11个时间位置；...保留剩余所有维度。+1不会自行累加，也不是循环。"
+      }
+    ]
+  },
+  {
+    "category": "ai",
+    "type": "PyTorch / 模型输入",
+    "title": "潜在表示 Latent Representation：从驾驶图像到预测图像",
+    "summary": "理解图像编码器、latent张量、世界模型预测与解码器的关系。",
+    "tags": [
+      "Latent",
+      "Encoder",
+      "Decoder",
+      "Epona",
+      "DCAE"
+    ],
+    "sections": [
+      {
+        "heading": "一、基础代码含义与原理",
+        "body": "原始图像通常是[B,T,C,H,W]的张量，B批次、T帧数、C通道、H高度、W宽度。Latent（潜在表示）是编码器学习的特征，不是可直接显示的RGB像素；例如把[3,512,1024]的图像压缩为更小的特征网格[32,16,32]仅为教学示意，Epona的实际维度要看encode_to_z的输出。"
+      },
+      {
+        "heading": "二、真实模型代码或可运行示例",
+        "body": "start_latents=tokenizer.encode_to_z(img[:,:condition_frames])\npredict_traj,predict_latents=model.step_eval(start_latents,pose,yaw,self_pred_traj=True)\n# test_free.py在收集并拼接predict_latents_patch后：\nimg_preds=tokenizer.z_to_image(predict_latents_patch,is_video=is_video)"
+      },
+      {
+        "heading": "三、代码的完整中文解释",
+        "body": "先从视频中选取历史帧，交给编码器提取潜在特征；世界模型基于这些特征和车辆运动条件生成下一步轨迹与视觉latent；最后将预测latent交给解码器，转换成驾驶场景图像。潜在特征的通道数量和空间大小由模型架构决定，不是随意改动后还能直接用于已训练模型的。"
       }
     ]
   }
