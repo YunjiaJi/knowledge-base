@@ -17,6 +17,10 @@
       {
         "heading": "为什么用0:1而不是0",
         "body": "0:1会保留该维度，结果仍是三维张量；单独写0通常会压缩该维度。切片右端不包含在范围内。"
+      },
+      {
+        "heading": "三维张量 [B,T,D] 与具体例子",
+        "body": "B=Batch Size（批次大小），T=Time Steps（时间步数），D=Feature Dimension（特征维度）。假设 predict_traj.shape=[1,3,3]，三个时间步分别为 [10,20,0.5]、[11,21,0.6]、[12,22,0.7]，最后一维按[x,y,yaw]排列。predict_pose=predict_traj[:,0:1,0:2] 得到 [[[10,20]]]，shape=[1,1,2]；predict_yaw=predict_traj[:,0:1,2:3] 得到 [[[0.5]]]，shape=[1,1,1]。第一个冒号取全部批次，0:1取第0个时间步，0:2取x、y，2:3取yaw。切片右端不包含，保留长度为1的维度。"
       }
     ],
     "example": "若 predict_traj 的形状是 (B,T,3)，predict_traj[:,0:1,2:3] 取第一个预测时刻的第3个通道，并保留维度。",
@@ -42,6 +46,18 @@
       {
         "heading": "与stack的区别",
         "body": "cat沿已有维度拼接，不增加维度；stack会新增一个维度，再把张量堆叠起来。"
+      },
+      {
+        "heading": "dim=0：沿第0维拼接（二维时增加行）",
+        "body": "import torch; a=torch.tensor([[1,2],[3,4]]); b=torch.tensor([[5,6]]); torch.cat((a,b),dim=0) → [[1,2],[3,4],[5,6]]，形状由[2,2]与[1,2]变成[3,2]。"
+      },
+      {
+        "heading": "dim=1：沿第1维拼接（二维时增加列）",
+        "body": "a=torch.tensor([[1,2],[3,4]]); b=torch.tensor([[5],[6]]); torch.cat((a,b),dim=1) → [[1,2,5],[3,4,6]]，形状由[2,2]与[2,1]变成[2,3]。"
+      },
+      {
+        "heading": "三维张量中的dim=1",
+        "body": "如果张量形状是[B,T,D]，dim=1就是时间维，不是普通二维表的列。torch.cat((历史时间片段,预测时间片段),dim=1)会延长时间轴，批次B和特征D必须一致。"
       }
     ],
     "example": "torch.cat((pose[:,1:condition_frames], predict_pose), dim=1) 通常表示沿时间维拼接历史片段与新预测位姿。",
@@ -277,6 +293,55 @@
       {
         "heading": "错误重定向",
         "body": "2代表标准错误流，/dev/null是丢弃输出的特殊设备；2>/dev/null不会隐藏标准输出。"
+      }
+    ]
+  },
+  {
+    "category": "ai",
+    "type": "PyTorch基础",
+    "title": "三维张量 [B,T,D]：Batch、Time、Feature",
+    "summary": "B是批次，T是时间步，D是特征维；理解轨迹张量的切片。",
+    "tags": [
+      "Tensor",
+      "Shape",
+      "Batch",
+      "Time Steps"
+    ],
+    "sections": [
+      {
+        "heading": "三个维度",
+        "body": "B（Batch Size）表示一次处理的样本组数；T（Time Steps）表示每组的时间位置数量；D（Feature Dimension）表示每个时间位置的特征数量。"
+      },
+      {
+        "heading": "轨迹例子",
+        "body": "predict_traj.shape=[1,3,3]，每个时间步的3个特征依次是x、y、yaw。predict_pose=predict_traj[:,0:1,0:2]→[1,1,2]；predict_yaw=predict_traj[:,0:1,2:3]→[1,1,1]。这里的x、y、yaw排列来自示例代码推断，具体需以模型定义为准。"
+      }
+    ],
+    "example": "predict_traj=[[[10,20,0.5],[11,21,0.6],[12,22,0.7]]]；predict_pose=[[[10,20]]]；predict_yaw=[[[0.5]]]。"
+  },
+  {
+    "category": "ai",
+    "type": "Python与模型输入",
+    "title": "args.condition_frames、历史帧与相对位姿",
+    "summary": "配置值与运行时参数不同；:10取10帧，:11取11个时间位置，不是无限滚动。",
+    "tags": [
+      "args",
+      "Epona",
+      "condition_frames",
+      "切片"
+    ],
+    "sections": [
+      {
+        "heading": "args.condition_frames",
+        "body": "args通常是运行参数对象，点号表示读取其属性。condition_frames=args.condition_frames把运行参数赋给局部变量。配置文件condition_frames=10可能是默认值，运行时是否为10要检查参数解析与覆盖逻辑。"
+      },
+      {
+        "heading": "图像编码",
+        "body": "img[:, :condition_frames]取所有批次的前N帧；tokenizer.encode_to_z(...)不是Python/PyTorch内置函数，通常是编码器对象的方法，用来把图像变成latent。"
+      },
+      {
+        "heading": "运动信息",
+        "body": "get_rel_pose(rot_matrix)不是Python/PyTorch内置函数；其来源和具体计算需查函数定义。pose_total[:, :condition_frames+1, ...]在N=10时取索引0到10共11个时间位置；...保留剩余所有维度。+1不会自行累加，也不是循环。"
       }
     ]
   }
