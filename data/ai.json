@@ -78,5 +78,206 @@
       "Epona论文卡片",
       "开环与闭环评价"
     ]
+  },
+  {
+    "category": "ai",
+    "type": "Python基础",
+    "title": "Python range(3, 10) 的含义",
+    "summary": "range左闭右开，生成3到9，不包含10。",
+    "tags": [
+      "Python",
+      "range",
+      "循环"
+    ],
+    "sections": [
+      {
+        "heading": "规则",
+        "body": "range(start, stop)从start开始，到stop之前结束，步长默认1。因此range(3,10)产生3、4、5、6、7、8、9，共7个整数。"
+      },
+      {
+        "heading": "常见用途",
+        "body": "用于循环索引、批量处理场景编号等。若希望包含10，需要写range(3,11)。"
+      }
+    ],
+    "example": "for scene in range(3, 10): 会依次处理scene=3到scene=9。"
+  },
+  {
+    "category": "ai",
+    "type": "Python与PyTorch",
+    "title": "Python张量切片：[:, 0:1, 2:3]",
+    "summary": "按三维张量的三个轴选取数据；冒号表示该维度全取，不是取到无限。",
+    "tags": [
+      "Python",
+      "Tensor",
+      "切片",
+      "维度"
+    ],
+    "sections": [
+      {
+        "heading": "逐维解释",
+        "body": "假设张量形状是(B,T,C)：第一个冒号表示所有batch；0:1表示时间维只取索引0并保留长度1；2:3表示特征维只取索引2并保留长度1。"
+      },
+      {
+        "heading": "为什么不直接写0和2",
+        "body": "切片0:1和2:3会保留维度，结果仍是三维张量；直接索引0或2通常会压缩对应维度。切片右端不包含在范围内。"
+      }
+    ],
+    "example": "predict_traj[:,0:1,2:3] 常用于取第一个预测时刻的Yaw通道，同时保留batch、时间和特征维。"
+  },
+  {
+    "category": "ai",
+    "type": "模型接口与代码阅读",
+    "title": "函数返回值与关键字参数：model.step_eval(..., self_pred_traj=True)",
+    "summary": "两个返回变量来自函数的返回值；self_pred_traj=True是传给函数的一个参数，二者不是一一对应关系。",
+    "tags": [
+      "Python",
+      "函数调用",
+      "返回值",
+      "关键字参数"
+    ],
+    "sections": [
+      {
+        "heading": "多返回值解包",
+        "body": "predict_traj, predict_latents = model.step_eval(...)表示函数返回一个可迭代对象（通常是tuple），其中包含两个结果，分别赋给两个变量。变量名由调用者选择。"
+      },
+      {
+        "heading": "关键字参数",
+        "body": "self_pred_traj=True是调用时显式传入的布尔参数，用来控制函数内部行为。它并不意味着函数只返回一个或两个值；返回几个值由函数定义和执行路径决定。"
+      },
+      {
+        "heading": "如何确认",
+        "body": "查看step_eval的函数定义和return语句，才能确定两个返回值的具体含义，以及self_pred_traj=True改变了什么。"
+      }
+    ]
+  },
+  {
+    "category": "ai",
+    "type": "模型机制",
+    "title": "一次性多步预测与自回归生成",
+    "summary": "一次性多步预测在一次模型调用中输出多个未来点；自回归生成把先前预测反馈给模型继续生成。",
+    "tags": [
+      "多步预测",
+      "自回归",
+      "轨迹生成",
+      "World Model"
+    ],
+    "sections": [
+      {
+        "heading": "一次性多步预测",
+        "body": "给定历史条件，模型一次输出未来N步。它并不自动意味着预测过程中会持续接收新观测；输出长度和推理调用方式要看模型接口。"
+      },
+      {
+        "heading": "自回归生成",
+        "body": "模型先生成下一步或一个片段，再把生成结果作为后续输入，反复迭代。若没有真实观测纠正，预测误差可能逐步传播。"
+      },
+      {
+        "heading": "两者关系",
+        "body": "一次性多步预测和自回归执行是不同层次的概念。一个模型可以单次输出多步，也可以在外部滑动窗口循环中反复调用。要结合测试脚本判断实际推理链路。"
+      }
+    ]
+  },
+  {
+    "category": "ai",
+    "type": "生成模型与扩散模型",
+    "title": "Diffusion sampling steps 与数据采样频率不是一回事",
+    "summary": "扩散采样步数表示生成时去噪迭代次数；视频帧率/轨迹采样频率表示真实时间轴上的采样密度。",
+    "tags": [
+      "Diffusion",
+      "sampling steps",
+      "帧率",
+      "采样频率"
+    ],
+    "sections": [
+      {
+        "heading": "扩散采样步数",
+        "body": "例如num_sampling_steps=100，通常表示从噪声到生成结果执行100次左右的去噪迭代。它影响生成计算量和生成质量，不等于读取100帧视频。"
+      },
+      {
+        "heading": "数据采样频率",
+        "body": "5Hz表示每秒5个时间点，时间间隔0.2s；10Hz表示每秒10个时间点，时间间隔0.1s。它描述真实场景的时间采样。"
+      },
+      {
+        "heading": "两者关系",
+        "body": "扩散采样步数影响单个样本的生成过程；数据采样频率影响模型输入/输出的时间分辨率。二者可以同时影响系统表现，但含义不同。"
+      }
+    ]
+  },
+  {
+    "category": "ai",
+    "type": "模型组件",
+    "title": "VAE / DCAE 编码器与解码器",
+    "summary": "编码器把图像压缩为潜变量，解码器再把潜变量还原成图像；预训练权重需要按代码配置加载。",
+    "tags": [
+      "VAE",
+      "DCAE",
+      "latent",
+      "decoder"
+    ],
+    "sections": [
+      {
+        "heading": "编码与解码",
+        "body": "Encoder将图像映射到更紧凑的latent表示；模型在latent空间进行预测后，Decoder将latent还原为图像。DCAE在Epona配置中作为图像tokenizer/编解码器组件。"
+      },
+      {
+        "heading": "Temporal-aware Decoder",
+        "body": "配置中add_decoder_temporal=True表示启用带时间建模能力的解码器结构；是否真正加载对应预训练权重，需要检查tokenizer初始化代码、checkpoint路径和load_state_dict逻辑。"
+      },
+      {
+        "heading": "如何排查视觉失真",
+        "body": "若真实历史帧经过编码再解码仍清晰，而预测latent解码后逐渐失真，问题更可能位于预测模型或自回归链路；若真实帧重建也明显失真，则应先检查编解码器和权重。"
+      }
+    ]
+  },
+  {
+    "category": "ai",
+    "type": "Linux与实验运行",
+    "title": "nohup、后台进程与日志检查",
+    "summary": "nohup让任务在终端退出后继续运行；重定向将输出保存到日志文件。",
+    "tags": [
+      "Linux",
+      "nohup",
+      "后台运行",
+      "日志"
+    ],
+    "sections": [
+      {
+        "heading": "启动命令",
+        "body": "nohup python -u run_batch.py > batch_logs/batch_console.log 2>&1 < /dev/null & 将程序放到后台运行，标准输出和错误输出都写入日志。-u让Python输出不缓冲，&表示后台执行。"
+      },
+      {
+        "heading": "查看状态",
+        "body": "tail -f batch_logs/batch_console.log实时查看日志；ps aux | grep '[r]un_batch.py'检查进程；若只看到启动日志，不足以判断程序已停止，还要结合进程、状态文件和输出文件检查。"
+      },
+      {
+        "heading": "tmux缺失",
+        "body": "若系统提示tmux: command not found，说明没有安装tmux；可以使用nohup作为简单替代。"
+      }
+    ]
+  },
+  {
+    "category": "ai",
+    "type": "Linux命令",
+    "title": "find、grep 与 2>/dev/null",
+    "summary": "find用于按目录和条件查找文件；grep用于搜索文本；2>/dev/null丢弃错误输出。",
+    "tags": [
+      "Linux",
+      "find",
+      "grep",
+      "shell"
+    ],
+    "sections": [
+      {
+        "heading": "find示例",
+        "body": "find test_videos -maxdepth 3 -name pred_traj.pt：在test_videos下最多向下搜索3层，查找文件名为pred_traj.pt的文件。"
+      },
+      {
+        "heading": "grep示例",
+        "body": "grep -RniE 'pattern' path：递归搜索、忽略大小写、显示行号，并使用扩展正则表达式。"
+      },
+      {
+        "heading": "错误重定向",
+        "body": "2代表标准错误流，/dev/null是丢弃输出的特殊设备；2>/dev/null不会隐藏标准输出。"
+      }
+    ]
   }
 ]
