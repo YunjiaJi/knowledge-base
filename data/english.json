@@ -64,5 +64,158 @@
       }
     ],
     "example": "The model generates future states in an autoregressive manner.（模型以自回归方式生成未来状态。）"
+  },
+  {
+    "category": "english",
+    "type": "论文阅读词汇",
+    "title": "discrete vs. continuous",
+    "summary": "discrete表示离散的；continuous表示连续的。",
+    "tags": [
+      "形容词",
+      "数学",
+      "机器学习"
+    ],
+    "sections": [
+      {
+        "heading": "区别",
+        "body": "discrete values取离散值，例如有限个类别或token；continuous values可在连续数值范围内变化，例如连续控制量或轨迹坐标。discrete不等于stochastic（随机的）。"
+      },
+      {
+        "heading": "论文搭配",
+        "body": "discrete action representation（离散动作表示）；continuous action space（连续动作空间）。"
+      }
+    ],
+    "example": "The model generates continuous trajectories rather than discrete action tokens.（模型直接生成连续轨迹，而不是离散动作token。）"
+  },
+  {
+    "category": "english",
+    "type": "论文阅读词汇",
+    "title": "stochastic",
+    "summary": "形容词：随机的、具有概率性的；强调过程或结果包含随机性。",
+    "tags": [
+      "形容词",
+      "概率",
+      "机器学习"
+    ],
+    "sections": [
+      {
+        "heading": "与discrete的区别",
+        "body": "discrete描述取值形式（离散）；stochastic描述过程是否具有随机性。一个变量可以是离散且随机的，也可以是连续且随机的。"
+      }
+    ],
+    "example": "stochastic process（随机过程）；stochastic sampling（随机采样）。"
+  },
+  {
+    "category": "english",
+    "type": "论文阅读词汇",
+    "title": "devise vs. design",
+    "summary": "devise强调想出/设计出一种方案或方法；design更常表示系统性设计、规划或构造。",
+    "tags": [
+      "动词",
+      "学术写作"
+    ],
+    "sections": [
+      {
+        "heading": "devise",
+        "body": "常指经过思考提出一个方法、策略或机制，突出构思和创造。例：devise a method / strategy。"
+      },
+      {
+        "heading": "design",
+        "body": "常指设计系统、结构、实验或产品，强调规划和构造。例：design an experiment / architecture。"
+      }
+    ]
+  },
+  {
+    "category": "english",
+    "type": "论文阅读词汇",
+    "title": "compromise",
+    "summary": "作动词时可表示损害、危及或使……受到损害；不只是“妥协”。",
+    "tags": [
+      "动词",
+      "网络安全",
+      "学术写作"
+    ],
+    "sections": [
+      {
+        "heading": "技术语境",
+        "body": "compromise a server表示攻陷服务器；compromised system表示已被入侵/攻陷的系统。作名词时也可表示妥协或折中。"
+      }
+    ],
+    "example": "The attacker compromised the server.（攻击者攻陷了服务器。）"
+  },
+  {
+    "category": "english",
+    "type": "论文阅读词汇",
+    "title": "infiltrate",
+    "summary": "动词：渗透、潜入；强调秘密进入某个系统或组织。",
+    "tags": [
+      "动词",
+      "网络安全"
+    ],
+    "sections": [
+      {
+        "heading": "技术语境",
+        "body": "infiltrate a network / service表示渗透网络或服务。与compromise相比，infiltrate强调进入过程；compromise强调成功攻陷或使其失陷。"
+      }
+    ]
+  },
+  {
+    "category": "english",
+    "type": "论文阅读词汇",
+    "title": "lateral movement",
+    "summary": "横向移动：攻击者进入一个系统后，进一步向同一网络中的其他主机或服务扩展。",
+    "tags": [
+      "网络安全",
+      "攻击链",
+      "名词短语"
+    ],
+    "sections": [
+      {
+        "heading": "常见表达",
+        "body": "perform lateral movement（实施横向移动）；move laterally across the network（在网络中横向扩展）。"
+      }
+    ]
+  },
+  {
+    "category": "english",
+    "type": "论文阅读词汇",
+    "title": "endeavor / endeavour",
+    "summary": "动词或名词：努力、尽力；endeavor为美式拼写，endeavour为英式拼写。",
+    "tags": [
+      "动词",
+      "名词",
+      "英美拼写"
+    ],
+    "sections": [
+      {
+        "heading": "正式邮件语境",
+        "body": "We will endeavor to arrange a bilingual moderator. 表示我们将尽力安排双语主持人。语气正式、礼貌，但不保证一定实现。"
+      }
+    ]
+  },
+  {
+    "category": "english",
+    "type": "论文阅读词汇",
+    "title": "trajectory、inference、autoregressive",
+    "summary": "三个自动驾驶/AI论文高频词：轨迹、推理、自回归的。",
+    "tags": [
+      "自动驾驶",
+      "机器学习",
+      "高频词"
+    ],
+    "sections": [
+      {
+        "heading": "trajectory",
+        "body": "名词：轨迹。trajectory prediction（轨迹预测）、future trajectory（未来轨迹）。"
+      },
+      {
+        "heading": "inference",
+        "body": "名词：推理。model inference（模型推理）、inference time（推理时间）；与训练training相区别。"
+      },
+      {
+        "heading": "autoregressive",
+        "body": "形容词：自回归的。autoregressive generation（自回归生成），强调前一步输出会作为后续输入或条件。"
+      }
+    ]
   }
 ]
