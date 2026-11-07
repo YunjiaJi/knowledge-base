@@ -2,13 +2,15 @@
   {
     "category": "papers",
     "type": "论文卡片 · 初始记录",
-    "title": "Epona：世界模型与长时域轨迹预测",
+    "title": "Epona：世界模型、视频生成与长时域轨迹预测",
     "summary": "当前已讨论的核心问题：利用一段历史观测生成未来场景，并预测多步连续轨迹；关注多步预测、自回归执行与视觉生成的关系。",
     "tags": [
       "World Model",
       "Trajectory Prediction",
       "Diffusion",
-      "NuPlan"
+      "NuPlan",
+      "Epona",
+      "NuScenes"
     ],
     "sections": [
       {
@@ -26,29 +28,7 @@
       {
         "heading": "后续需要补充",
         "body": "论文完整引文与版本、正式架构图、训练数据与配置、作者原始指标、消融实验、碰撞评价协议，以及当前复现与论文设置的差异。未核实的细节不在此卡片中推断。"
-      }
-    ],
-    "related": [
-      "自回归生成",
-      "L2、ADE与FDE",
-      "Pose与Yaw",
-      "OBB与SAT"
-    ]
-  },
-  {
-    "category": "papers",
-    "type": "论文卡片",
-    "title": "Epona：视频生成与长时域轨迹预测/规划",
-    "summary": "围绕从历史观测生成未来视频和连续轨迹，关注多步预测、连续动作表示、时序解码和自回归推理。",
-    "tags": [
-      "Epona",
-      "World Model",
-      "Diffusion",
-      "NuPlan",
-      "NuScenes",
-      "Trajectory Prediction"
-    ],
-    "sections": [
+      },
       {
         "heading": "研究问题（基于已讨论论文段落的学习摘要）",
         "body": "关注世界模型如何利用历史场景信息生成未来场景并预测未来轨迹，为长时域预测与规划提供基础。论文对比视频扩散方法与面向决策/规划的世界模型，强调因果动态、智能体交互、可变长度序列生成和实时规划的重要性。"
@@ -75,9 +55,12 @@
       }
     ],
     "related": [
+      "自回归生成",
+      "L2、ADE与FDE",
+      "Pose与Yaw",
+      "OBB与SAT",
       "DCAE与VAE",
       "扩散采样步数",
-      "自回归生成",
       "L2/ADE/FDE",
       "OBB/SAT"
     ]
