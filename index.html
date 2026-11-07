@@ -1,79 +1,16 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>基础知识库</title>
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>基础知识库</title>
 <style>
-:root{--ink:#203047;--muted:#68778b;--line:#e3e9f0;--bg:#f5f7fb;--blue:#315f91;--pale:#eaf1f9;--green:#28765b}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 "Microsoft YaHei","PingFang SC","Noto Sans CJK SC",Arial,sans-serif}
-header{background:linear-gradient(120deg,#183653,#315f91);color:white;padding:28px 22px}
-.wrap{max-width:1180px;margin:auto}.eyebrow{font-size:12px;letter-spacing:.12em;opacity:.8}.hero{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}
-h1{font-size:28px;margin:5px 0}.hero p{margin:4px 0 0;color:#dce8f4}.stats{display:flex;gap:10px}.stat{background:#ffffff18;border:1px solid #ffffff35;border-radius:12px;padding:10px 14px;min-width:86px;text-align:center}.stat b{display:block;font-size:22px}
-main{max-width:1180px;margin:22px auto;padding:0 18px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
-input,select,button{font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:white;color:var(--ink)}
-input{flex:1;min-width:220px}button{cursor:pointer}button:hover{border-color:#9ab3ce}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tab{background:white}.tab.active{background:var(--blue);color:white;border-color:var(--blue)}
-.layout{display:grid;grid-template-columns:285px 1fr;gap:16px}.panel,.content{background:white;border:1px solid var(--line);border-radius:15px;padding:17px}.panel h3,.content h2{margin:0 0 12px}.book{padding:12px;border:1px solid var(--line);border-radius:11px;margin:8px 0;cursor:pointer}.book.active{border-color:#7da2ca;background:#f0f5fb}.book strong{display:block}.book small{color:var(--muted)}
-.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.card{border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;transition:.15s}.card:hover{border-color:#8eaccb;transform:translateY(-1px)}.tag{display:inline-block;font-size:11px;color:var(--blue);background:var(--pale);border-radius:20px;padding:2px 8px;margin-bottom:7px}.card h3{font-size:16px;margin:0 0 5px}.card p{font-size:13px;color:var(--muted);margin:0}.detail{margin-top:14px;padding:17px;background:#f8fafc;border:1px solid var(--line);border-radius:12px}.detail h3{margin:0 0 8px}.detail h4{margin:13px 0 4px;color:var(--blue)}.formula{background:#edf3fa;border-left:3px solid var(--blue);padding:10px 12px;border-radius:7px;margin:9px 0;font-family:Georgia,serif}.hint{color:var(--muted);font-size:13px}.quiz{margin-top:16px;border-top:1px solid var(--line);padding-top:13px}.quiz button{margin:5px 6px 5px 0}.correct{color:var(--green);font-weight:700}.wrong{color:#b54747;font-weight:700}.empty{padding:25px;text-align:center;color:var(--muted)}footer{max-width:1180px;margin:18px auto 36px;padding:0 18px;color:var(--muted);font-size:12px}
-@media(max-width:760px){.layout{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.stats{width:100%}.stat{flex:1}}
-</style>
-</head>
-<body>
-<header><div class="wrap hero"><div><div class="eyebrow">PERSONAL LEARNING LIBRARY</div><h1>基础知识库</h1><p>把每次讲解沉淀成可搜索、可复习、可自测的知识卡片。</p></div><div class="stats"><div class="stat"><b id="count">12</b><span>知识卡片</span></div><div class="stat"><b>4</b><span>主题书架</span></div></div></div></header>
-<main>
-<div class="toolbar"><input id="search" placeholder="搜索知识点，例如：Yaw、SAT、torch.cat、ADE…"><select id="level"><option value="all">全部难度</option><option>入门</option><option>进阶</option></select><button id="reset">清除筛选</button></div>
-<div class="tabs" id="tabs"></div>
-<div class="layout">
-<aside class="panel"><h3>四本书</h3><div id="books"></div><p class="hint">点击书架切换主题。知识点可以通过上方搜索框跨书查找。</p></aside>
-<section class="content"><h2 id="sectionTitle">全部知识点</h2><p class="hint" id="sectionDesc">从已讨论的内容建立第一批索引。点击卡片查看解释和复习提示。</p><div class="cards" id="cards"></div><div id="detail"></div></section>
-</div>
-</main>
-<footer>维护方式：每次出现新的重要知识点时，在后续对话中告诉我“收录到知识库”。我会整理成卡片并生成更新版本；请保留最新下载的HTML文件作为主版本。</footer>
+:root{--bg:#f4f7fb;--panel:#fff;--ink:#243247;--muted:#65758b;--line:#e1e8f0;--blue:#315f91;--soft:#edf3fa}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}header{background:linear-gradient(120deg,#183653,#315f91);color:white;padding:30px 22px}header .wrap,main,footer{max-width:1180px;margin:auto}h1{margin:4px 0;font-size:29px}header p{margin:4px 0;color:#dce8f4}.eyebrow{font-size:12px;letter-spacing:.12em;opacity:.8}.stats{display:flex;gap:10px;margin-top:16px}.stat{border:1px solid #ffffff44;background:#ffffff18;border-radius:10px;padding:8px 14px}.stat b{font-size:20px;display:block}main{padding:22px 18px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}input,button{font:inherit;border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:#fff;color:var(--ink)}input{flex:1;min-width:220px}button{cursor:pointer}.layout{display:grid;grid-template-columns:260px 1fr;gap:16px}.panel,.content{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:17px}.cat{display:flex;width:100%;justify-content:space-between;text-align:left;margin:5px 0}.cat.active{background:var(--soft);border-color:#a9bfd8;color:#244d79}.cat small,.muted{color:var(--muted)}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{border:1px solid var(--line);border-radius:12px;padding:15px}.card h3{margin:3px 0 6px;font-size:17px}.meta{font-size:12px;color:var(--muted)}.tag{display:inline-block;background:var(--soft);color:var(--blue);border-radius:20px;padding:2px 8px;font-size:11px;margin:2px 4px 2px 0}.card p{margin:7px 0}.card details{border-top:1px solid var(--line);margin-top:10px;padding-top:9px}.card summary{cursor:pointer;color:var(--blue);font-weight:600}.section{margin:10px 0}.section b{display:block;margin-bottom:3px}.formula{background:#f0f5fa;padding:9px 11px;border-left:3px solid var(--blue);border-radius:7px;margin:8px 0}.empty{padding:30px;text-align:center;color:var(--muted)}footer{padding:0 18px 30px;color:var(--muted);font-size:12px}@media(max-width:760px){.layout{grid-template-columns:1fr}.cards{grid-template-columns:1fr}}
+</style></head><body><header><div class="wrap"><div class="eyebrow">PERSONAL LEARNING LIBRARY</div><h1>基础知识库</h1><p>把每次讲解沉淀成可搜索、可复习、可持续更新的知识卡片。</p><div class="stats"><div class="stat"><b id="total">…</b>知识卡片</div><div class="stat"><b>5</b>主题书架</div></div></div></header>
+<main><div class="toolbar"><input id="q" placeholder="搜索知识点、公式、关键词……"><button id="clear">清除搜索</button></div><div class="layout"><aside class="panel"><b>知识分类</b><div id="cats"></div><p class="muted">点击分类浏览，也可以跨分类搜索。</p></aside><section class="content"><h2 id="heading">全部知识</h2><p class="muted" id="desc">正在读取知识卡片…</p><div id="cards" class="cards"></div><p class="muted" id="count"></p></section></div></main><footer>新增知识点时，可以在对话中说“收录到基础知识库”。内容按主题保存在 data/*.json，网页自动读取数据。</footer>
 <script>
-const books=[
-{id:"math",name:"01 数学与物理基础",desc:"公式原理、运动学、力学、向量与坐标变换"},
-{id:"auto",name:"02 汽车与自动驾驶",desc:"车辆运动、坐标系、轨迹、感知与碰撞"},
-{id:"code",name:"03 编程与AI模型",desc:"Python、PyTorch、模型结构与推理链路"},
-{id:"research",name:"04 科研方法与实验评价",desc:"指标定义、实验设计、数据质量与结果解释"}
-];
-const topics=[
-{id:"sin-cos",book:"math",title:"sin、cos、tan：三角函数",level:"入门",summary:"用直角三角形描述角度与边长之间的比例。",body:"先确定一个锐角θ：sinθ=对边/斜边，cosθ=邻边/斜边，tanθ=对边/邻边。它们不是三条边本身，而是边长的比例。",formula:"sinθ = 对边 / 斜边　　cosθ = 邻边 / 斜边　　tanθ = 对边 / 邻边",apply:"车辆爬坡、力的分解、方向角与坐标投影都会用到三角函数。",quiz:{q:"在直角三角形中，sinθ等于哪一项？",opts:["邻边/斜边","对边/斜边","对边/邻边"],a:1,why:"正弦是对边与斜边的比值。"}},
-{id:"kinematics",book:"math",title:"速度、加速度与位移",level:"入门",summary:"理解车辆运动随时间如何变化。",body:"速度描述位置变化快慢；加速度描述速度变化快慢。匀加速直线运动中，速度会随时间线性变化，位移则包含时间平方项。",formula:"v = v₀ + at　　s = v₀t + ½at²　　v² = v₀² + 2as",apply:"分析车辆起步、制动、减速以及预测轨迹的纵向距离。",quiz:{q:"加速度的物理含义是什么？",opts:["位置变化率","速度变化率","路程变化率"],a:1,why:"加速度是速度对时间的变化率。"}},
-{id:"force-slope",book:"math",title:"坡道受力：F = mg sinθ",level:"进阶",summary:"重力沿斜坡方向的分量来自向量分解。",body:"车辆在斜坡上，重力mg可以分解为垂直坡面的分量mg cosθ，以及沿坡面向下的分量mg sinθ。这里的sinθ来自直角三角形的边长比例。",formula:"F∥ = mg sinθ　　F⊥ = mg cosθ",apply:"用于理解坡道阻力、驱动力需求和车辆起步。",quiz:{q:"沿斜坡方向的重力分量是？",opts:["mg cosθ","mg sinθ","mg tanθ"],a:1,why:"沿斜面方向对应角θ的对边，因此是mg sinθ。"}},
-{id:"frames",book:"auto",title:"车辆坐标系与世界坐标系",level:"进阶",summary:"同一个位置和方向，换一个参考坐标系，数值表达就会改变。",body:"车辆坐标系随车移动，常约定X向前、Y向左；世界坐标系固定在环境中。局部坐标中的点要通过旋转和平移转换到世界坐标。比较轨迹前，必须先统一坐标系、原点、轴向和单位。",formula:"p_world = R(θ) · p_vehicle + t",apply:"Epona的Pose、Yaw、GT轨迹和其他车辆标注必须放到一致的参考坐标系中才能比较。",quiz:{q:"比较两辆车是否碰撞前，最重要的前提之一是什么？",opts:["统一坐标系","只比较中心点","忽略Yaw"],a:0,why:"位置、方向必须在同一坐标系下表达。"}},
-{id:"obb",book:"auto",title:"二维有向包围框（OBB）",level:"入门",summary:"用一个随车辆朝向旋转的矩形近似车辆占据的平面区域。",body:"OBB通常由中心位置(x,y)、长度L、宽度W和航向角Yaw描述。与始终平行于坐标轴的普通矩形不同，OBB会随着车辆转向而旋转。车辆位置参考点必须与矩形中心定义一致。",formula:"OBB = (x, y, L, W, θ)",apply:"你目前假设自车长4.7m、宽1.9m。若轨迹位置是后轴中心，就要确认是否需要换算到几何中心。",quiz:{q:"OBB相较于轴对齐矩形（AABB）的关键特点是什么？",opts:["没有长度和宽度","可随物体朝向旋转","只表示中心点"],a:1,why:"Oriented表示有方向，矩形可随物体朝向旋转。"}},
-{id:"sat",book:"auto",title:"分离轴定理（SAT）",level:"进阶",summary:"通过检查投影区间是否分离，判断两个凸多边形是否相交。",body:"把两个矩形分别投影到候选轴上。如果至少存在一条轴，使两个投影区间完全分开，则两个矩形不相交。二维矩形通常检查双方各自边的法向量，共四条候选轴；四条轴都没有分离，才判定相交或接触。",formula:"若 Amax < Bmin 或 Bmax < Amin，则该轴上分离。",apply:"对每个预测时刻建立自车OBB和他车OBB，再用SAT判断是否发生几何重叠。边界接触是否算碰撞取决于实现的容差规则。",quiz:{q:"只要找到一条分离轴，结论是什么？",opts:["两个OBB不相交","两个OBB必相交","无法判断"],a:0,why:"分离轴的定义就是两个投影区间在该轴上不重叠。"}},
-{id:"python-slice",book:"code",title:"Python切片：[:, 0:1, 2:3]",level:"入门",summary:"冒号表示沿某一维取一个范围；切片右端不包含在内。",body:"在三维张量中，[:, 0:1, 2:3]表示：第一维全部保留；第二维取索引0但保留长度为1；第三维取索引2但保留长度为1。它不是“到无限”，而是按维度切片。",formula:"tensor[:, 0:1, 2:3] → 保留所有 batch、一个时间位置、一个特征列",apply:"Epona代码中常用它提取某个时刻的XY或Yaw，同时保留张量维度，方便后续拼接。",quiz:{q:"Python切片a[0:3]会包含索引3吗？",opts:["包含","不包含","取决于数组长度"],a:1,why:"切片左闭右开，包含0、1、2，不包含3。"}},
-{id:"torch-cat",book:"code",title:"torch.cat() 与 dim",level:"入门",summary:"沿指定维度把多个形状兼容的张量拼接起来。",body:"torch.cat((A,B), dim=1)表示沿第1维拼接。除拼接维度外，其他维度大小必须一致。dim是dimension（维度）的缩写，不是一个独立的拼接函数。",formula:"torch.cat((A, B), dim=1)",apply:"Epona会沿时间维度拼接历史Pose和预测Pose，形成后续模型输入。",quiz:{q:"dim=1指定什么？",opts:["沿第1维拼接","只保留第1个元素","把张量变成1维"],a:0,why:"dim指定拼接发生在哪个维度。"}},
-{id:"autoregressive",book:"code",title:"开环自回归预测",level:"进阶",summary:"模型把自己的预测结果继续作为后续输入，而不是持续读取真实未来观测。",body:"在自回归生成中，模型每轮根据当前条件生成下一段结果，再将生成结果反馈给下一轮。若没有真实观测纠正，误差可能逐步累积。开环表示评价期间没有用真实未来观测闭环修正。",formula:"当前条件 → 预测 → 预测结果反馈 → 下一轮预测",apply:"你正在检查Epona的test_demo.py和滑动窗口逻辑，以确认真实图像何时被重新输入，以及预测轨迹如何拼接。",quiz:{q:"开环自回归过程中，如果不重新输入真实观测，预测误差可能怎样？",opts:["一定自动消失","可能逐步累积","每轮必然归零"],a:1,why:"模型使用自己的输出继续预测，错误可能传播。"}},
-{id:"l2-ade",book:"research",title:"L2、ADE 与 FDE",level:"入门",summary:"分别衡量某个时刻的位置误差、全轨迹平均误差和终点误差。",body:"单点L2是预测位置与真实位置的欧氏距离。ADE是评价时域内各预测点位置误差的平均值。FDE是最后一个预测点的位置误差。你表格里的1s、2s、3s L2是对应时刻的单点误差，不是平均值。",formula:"L2ₜ = √[(x̂ₜ−xₜ)²+(ŷₜ−yₜ)²]<br/>ADE = (1/N) Σₜ L2ₜ　　FDE = L2ₙ",apply:"Epona的3s L2是最后一个预测点误差；ADE则汇总整个3秒预测窗口。",quiz:{q:"ADE代表什么？",opts:["最后一个点的误差","所有预测点位置误差的平均值","航向角误差"],a:1,why:"ADE是Average Displacement Error，按评价点求平均。"}},
-{id:"collision-metrics",book:"research",title:"Collision Occurrence、Frame Ratio、Rate",level:"进阶",summary:"分别从单条轨迹是否碰撞、时间点比例、多条轨迹比例描述碰撞。",body:"Collision Occurrence：一条预测轨迹在评价窗口内是否至少发生一次碰撞。Collision Frame Ratio：发生碰撞的有效评价时间点占比。Collision Rate：多条预测轨迹中发生过碰撞的轨迹比例。单条确定性预测不能单独代表多轨迹Collision Rate。",formula:"Frame Ratio = 碰撞时间点数 / 有效评价时间点数<br/>Collision Rate = 碰撞轨迹数 / 有效预测轨迹数",apply:"你当前每个场景主要是一条Method B预测轨迹，因此可以报告Occurrence和Frame Ratio；若要报告统计意义上的多轨迹Rate，需要多个有效预测样本。",quiz:{q:"只有一条确定性预测轨迹时，最直接可报告的是？",opts:["多样本Collision Rate","Collision Occurrence","两者都不能"],a:1,why:"单条轨迹可以判断评价窗口内是否发生过碰撞。"}},
-{id:"sampling",book:"research",title:"采样频率与时间对齐",level:"进阶",summary:"输入图像频率、轨迹输出时间步长和Diffusion采样步数是不同概念。",body:"5Hz意味着相邻目标采样时刻间隔0.2s。模型读取10帧历史图像，不代表每帧间隔0.1s；必须查看数据加载和预处理代码。Diffusion的100个sampling steps通常是去噪迭代次数，也不等于100个真实时间点。",formula:"采样频率 f = 1 / Δt；5Hz 对应 Δt = 0.2s",apply:"Epona配置中的num_sampling_steps=100描述扩散采样过程，不能直接理解为视频帧率或未来轨迹点数。",quiz:{q:"5Hz对应相邻采样时刻间隔多少？",opts:["0.02s","0.1s","0.2s"],a:2,why:"Δt=1/f=1/5=0.2秒。"}}
-];
-let activeBook="all", activeTopic=null;
+const files=[["math","数学与物理基础","公式原理、运动学、力学、三角函数"],["ai","计算机与人工智能基础","Python、PyTorch、深度学习与生成模型"],["driving","自动驾驶与研究方法","车辆运动、轨迹评价、碰撞检测与实验方法"],["papers","论文知识库","每篇论文独立记录研究问题、方法、数据和结论"],["english","英语词汇库","论文阅读词汇、搭配、例句与易混词"]];
+let data={},selected="all";
 const $=id=>document.getElementById(id);
-function render(){
- const q=$("search").value.trim().toLowerCase(), level=$("level").value;
- const list=topics.filter(t=>(activeBook==="all"||t.book===activeBook)&&
-  (level==="all"||t.level===level)&&(!q||(t.title+t.summary+t.body+t.apply).toLowerCase().includes(q)));
- $("count").textContent=topics.length;
- $("tabs").innerHTML=`<button class="tab ${activeBook==="all"?"active":""}" data-book="all">全部</button>`+books.map(b=>`<button class="tab ${activeBook===b.id?"active":""}" data-book="${b.id}">${b.name.slice(0,2)}</button>`).join("");
- $("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{activeBook=b.dataset.book;activeTopic=null;render()});
- $("books").innerHTML=books.map(b=>`<div class="book ${activeBook===b.id?"active":""}" data-book="${b.id}"><strong>${b.name}</strong><small>${b.desc}</small><small> · ${topics.filter(t=>t.book===b.id).length} 个知识点</small></div>`).join("");
- $("books").querySelectorAll(".book").forEach(b=>b.onclick=()=>{activeBook=b.dataset.book;activeTopic=null;render()});
- $("sectionTitle").textContent=activeBook==="all"?"全部知识点":books.find(b=>b.id===activeBook).name;
- $("cards").innerHTML=list.length?list.map(t=>`<article class="card" data-id="${t.id}"><span class="tag">${books.find(b=>b.id===t.book).name.slice(0,2)} · ${t.level}</span><h3>${t.title}</h3><p>${t.summary}</p></article>`).join(""):`<div class="empty">没有找到匹配的知识点。</div>`;
- $("cards").querySelectorAll(".card").forEach(c=>c.onclick=()=>{activeTopic=c.dataset.id;showDetail()});
- if(activeTopic && list.some(t=>t.id===activeTopic))showDetail(); else $("detail").innerHTML="";
-}
-function showDetail(){
- const t=topics.find(x=>x.id===activeTopic);if(!t)return;
- $("detail").innerHTML=`<div class="detail"><span class="tag">${books.find(b=>b.id===t.book).name} · ${t.level}</span><h3>${t.title}</h3><p>${t.body}</p><div class="formula">${t.formula}</div><h4>和实际研究的联系</h4><p>${t.apply}</p><div class="quiz"><b>快速自测</b><p>${t.quiz.q}</p>${t.quiz.opts.map((o,i)=>`<button data-i="${i}">${o}</button>`).join("")}<p id="feedback" class="hint">选择一个答案，检查是否理解。</p></div></div>`;
- $("detail").querySelectorAll(".quiz button").forEach(b=>b.onclick=()=>{let ok=Number(b.dataset.i)===t.quiz.a;$("feedback").className=ok?"correct":"wrong";$("feedback").textContent=(ok?"回答正确！":"再想一想。")+ " "+t.quiz.why});
-}
-$("search").addEventListener("input",()=>{activeTopic=null;render()});
-$("level").addEventListener("change",()=>{activeTopic=null;render()});
-$("reset").onclick=()=>{$("search").value="";$("level").value="all";activeBook="all";activeTopic=null;render()};
-render();
-</script>
-</body></html>
+function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+async function load(){let results=await Promise.all(files.map(async f=>{try{let r=await fetch("./data/"+f[0]+".json");if(!r.ok)throw Error(r.status);return [f[0],await r.json()]}catch(e){return [f[0],[]]}}));results.forEach(([k,v])=>data[k]=v);$("total").textContent=Object.values(data).reduce((n,a)=>n+a.length,0);renderCats();render();}
+function renderCats(){$("cats").innerHTML='<button class="cat active" data-id="all">全部知识 <small>'+Object.values(data).reduce((n,a)=>n+a.length,0)+'</small></button>'+files.map(f=>'<button class="cat" data-id="'+f[0]+'">'+f[1]+' <small>'+(data[f[0]]||[]).length+'</small></button>').join("");document.querySelectorAll(".cat").forEach(b=>b.onclick=()=>{selected=b.dataset.id;renderCats();render()});}
+function render(){let q=$("q").value.trim().toLowerCase(),f=files.find(x=>x[0]===selected);$("heading").textContent=f?f[1]:"全部知识";$("desc").textContent=f?f[2]:"按主题浏览，也可以搜索标题、正文、公式和标签。";let all=Object.entries(data).flatMap(([k,a])=>a.map(x=>({...x,_cat:k})));let shown=all.filter(x=>(selected==="all"||x._cat===selected)&&(!q||JSON.stringify(x).toLowerCase().includes(q)));$("cards").innerHTML=shown.length?shown.map(x=>'<article class="card"><div class="meta">'+esc(files.find(f=>f[0]===x._cat)?.[1]||"")+' · '+esc(x.type||"知识点")+'</div><h3>'+esc(x.title)+'</h3><p>'+esc(x.summary||"")+'</p><div>'+(x.tags||[]).map(t=>'<span class="tag">'+esc(t)+'</span>').join("")+'</div><details><summary>查看详细内容</summary>'+(x.formula?'<div class="formula">'+esc(x.formula)+'</div>':"")+(x.sections||[]).map(s=>'<div class="section"><b>'+esc(s.heading)+'</b><div>'+esc(s.body)+'</div></div>').join("")+(x.example?'<div class="section"><b>例子</b><div>'+esc(x.example)+'</div></div>':"")+(x.related?.length?'<div class="section"><b>关联知识</b><div>'+x.related.map(esc).join("、")+'</div></div>':"")+'</details></article>').join(""):'<div class="empty">没有找到匹配的知识卡片。</div>';$("count").textContent="当前显示 "+shown.length+" / "+all.length+" 张卡片";}
+$("q").addEventListener("input",render);$("clear").onclick=()=>{$("q").value="";render()};load();
+</script></body></html>
