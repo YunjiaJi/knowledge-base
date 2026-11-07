@@ -1,0 +1,82 @@
+[
+  {
+    "category": "ai",
+    "type": "Python / 张量操作",
+    "title": "Python切片：[:, 0:1, 2:3]",
+    "summary": "对三维张量按各维度选取范围；冒号表示该维度取完整范围，不表示无限。",
+    "tags": [
+      "Python",
+      "Tensor",
+      "切片"
+    ],
+    "sections": [
+      {
+        "heading": "逐维解释",
+        "body": "假设张量形状为 (B,T,C)，[:, 0:1, 2:3] 表示：第0维全部保留；第1维取索引0（保留长度1）；第2维取索引2（保留长度1）。"
+      },
+      {
+        "heading": "为什么用0:1而不是0",
+        "body": "0:1会保留该维度，结果仍是三维张量；单独写0通常会压缩该维度。切片右端不包含在范围内。"
+      }
+    ],
+    "example": "若 predict_traj 的形状是 (B,T,3)，predict_traj[:,0:1,2:3] 取第一个预测时刻的第3个通道，并保留维度。",
+    "related": [
+      "PyTorch Tensor",
+      "torch.cat()"
+    ]
+  },
+  {
+    "category": "ai",
+    "type": "PyTorch函数",
+    "title": "torch.cat() 与 dim 参数",
+    "summary": "torch.cat() 沿指定的已有维度拼接多个张量；dim决定拼接轴。",
+    "tags": [
+      "PyTorch",
+      "张量拼接"
+    ],
+    "sections": [
+      {
+        "heading": "基本形式",
+        "body": "torch.cat((tensor1,tensor2,...), dim=1) 将张量沿第1维拼接。除拼接维度外，其他维度大小必须一致。"
+      },
+      {
+        "heading": "与stack的区别",
+        "body": "cat沿已有维度拼接，不增加维度；stack会新增一个维度，再把张量堆叠起来。"
+      }
+    ],
+    "example": "torch.cat((pose[:,1:condition_frames], predict_pose), dim=1) 通常表示沿时间维拼接历史片段与新预测位姿。",
+    "related": [
+      "Python切片",
+      "Tensor维度"
+    ]
+  },
+  {
+    "category": "ai",
+    "type": "模型机制",
+    "title": "自回归生成（Autoregressive Generation）",
+    "summary": "模型把前一步生成结果作为后续输入，逐步产生序列。",
+    "tags": [
+      "自回归",
+      "世界模型",
+      "生成模型"
+    ],
+    "sections": [
+      {
+        "heading": "基本过程",
+        "body": "给定初始条件，模型生成下一步或一段未来；再把生成结果接回输入，继续生成后续内容。"
+      },
+      {
+        "heading": "误差累积",
+        "body": "如果后续步骤持续使用模型自己的预测，而不重新输入真实观测，早期误差可能传递并累积。实际程度取决于模型结构、训练方式和反馈机制。"
+      },
+      {
+        "heading": "与一次性多步预测的区别",
+        "body": "一次性多步预测在一次推理中输出多个未来点；自回归预测则通过多轮迭代延长序列。两者不是同一个概念。"
+      }
+    ],
+    "related": [
+      "Epona论文卡片",
+      "开环与闭环评价"
+    ]
+  }
+]
