@@ -88,5 +88,172 @@
       "车辆坐标系",
       "Collision Occurrence"
     ]
+  },
+  {
+    "category": "driving",
+    "type": "车辆运动与坐标",
+    "title": "Pose、Yaw 与车辆坐标系",
+    "summary": "Pose描述位置/位姿，Yaw描述绕竖直轴的航向角；必须明确坐标系、参考点和角度正方向。",
+    "tags": [
+      "Pose",
+      "Yaw",
+      "坐标系",
+      "旋转矩阵"
+    ],
+    "sections": [
+      {
+        "heading": "Pose",
+        "body": "二维车辆平面中常用(x,y)描述位置；完整位姿还包括姿态。不同数据集可能使用后轴中心、几何中心或其他参考点，比较前要核对定义。"
+      },
+      {
+        "heading": "Yaw",
+        "body": "Yaw通常表示车辆绕竖直轴的航向角。角度差需要考虑环绕边界，例如179°与-179°之间的最小角差是2°而不是358°。"
+      },
+      {
+        "heading": "坐标变换",
+        "body": "将世界坐标转换到车辆局部坐标，需要使用参考车辆的平移和旋转；不能只对全局X、Y分别作差。"
+      }
+    ]
+  },
+  {
+    "category": "driving",
+    "type": "轨迹预测与评价",
+    "title": "L2、ADE、FDE：单点误差与时域平均",
+    "summary": "单个时刻的L2是位置欧氏距离；ADE是预测时域各点L2的平均；FDE是最后一个预测点的误差。",
+    "formula": "L2ₜ=√((x̂ₜ−xₜ)²+(ŷₜ−yₜ)²)；ADE=(1/N)ΣL2ₜ；FDE=L2ₙ",
+    "tags": [
+      "L2",
+      "ADE",
+      "FDE",
+      "轨迹预测"
+    ],
+    "sections": [
+      {
+        "heading": "L2",
+        "body": "若dx和dy是同一时刻的纵横向误差，L2=√(dx²+dy²)。例如dx=0.5380m、dy=-0.0035m，L2约为0.5380m，不是dx与dy之差。"
+      },
+      {
+        "heading": "ADE与3s L2",
+        "body": "ADE需要对整个评价时域内所有有效预测点的L2求平均。3s对应的L2只是最后一个时刻的点误差，不能把1s、2s、3s三个抽样值直接平均后称为标准ADE，除非评价协议明确如此定义。"
+      },
+      {
+        "heading": "FDE",
+        "body": "FDE是最后一个预测点的误差；若评价窗口为3s，FDE通常对应3s终点的L2。"
+      }
+    ]
+  },
+  {
+    "category": "driving",
+    "type": "安全评价指标",
+    "title": "Collision Occurrence、Frame Ratio 与 Collision Rate",
+    "summary": "三个指标分别描述是否发生过碰撞、碰撞时间点占比，以及多条预测轨迹中发生碰撞的轨迹比例。",
+    "tags": [
+      "Collision Occurrence",
+      "Collision Frame Ratio",
+      "Collision Rate",
+      "安全评价"
+    ],
+    "sections": [
+      {
+        "heading": "Collision Occurrence",
+        "body": "对一条轨迹，在规定预测窗口内是否至少出现一次几何碰撞，通常记为0/1。"
+      },
+      {
+        "heading": "Collision Frame Ratio",
+        "body": "碰撞时间点数除以有效评价时间点数。必须明确分母只包含可可靠评价的时间点；unknown/indeterminate不应被默认为无碰撞。"
+      },
+      {
+        "heading": "Collision Rate",
+        "body": "多条预测轨迹中，发生过碰撞的轨迹数除以可评价轨迹总数。它需要多条轨迹样本，单条预测不能估计稳定的轨迹碰撞率。"
+      }
+    ]
+  },
+  {
+    "category": "driving",
+    "type": "安全评价指标",
+    "title": "TTC 与长时域碰撞风险",
+    "summary": "TTC估计在当前相对运动趋势下到达碰撞状态的时间；短预测窗口之外的风险应单独报告。",
+    "tags": [
+      "TTC",
+      "Long-horizon risk",
+      "碰撞风险"
+    ],
+    "sections": [
+      {
+        "heading": "TTC概念",
+        "body": "Time To Collision是基于相对位置和相对速度估计的潜在碰撞剩余时间。简单一维同向追尾近似中，若前车与后车间距为d且闭合速度为v_close>0，则TTC=d/v_close。复杂场景需要考虑相对方向、转向和几何形状。"
+      },
+      {
+        "heading": "3秒外风险",
+        "body": "若轨迹在3秒评价窗口内未碰撞，但按延伸轨迹在之后很快接近或发生碰撞，不应记为3秒Collision Occurrence。可以单独报告预测窗口外的首次潜在冲突时间、最小间距或长时域风险，并标明外推假设和评价时域。"
+      }
+    ]
+  },
+  {
+    "category": "driving",
+    "type": "交通信号与运动图像",
+    "title": "绿波带与时空图：斜率为什么是1/v",
+    "summary": "时空图中横轴为距离、纵轴为时间时，直线斜率Δt/Δx=1/v。",
+    "formula": "t = x/v；斜率 = Δt/Δx = 1/v",
+    "tags": [
+      "绿波",
+      "时空图",
+      "速度",
+      "信号协调"
+    ],
+    "sections": [
+      {
+        "heading": "读图",
+        "body": "如果横轴x是距离、纵轴t是时间，车辆以恒定速度行驶时轨迹是直线，斜率是1/v。速度越大，单位距离所需时间越少，直线越平缓。"
+      },
+      {
+        "heading": "为什么两段速度不能只看线条长短",
+        "body": "计算速度要使用各自线段的Δx和Δt。图形的视觉长度会受坐标轴比例影响；只有坐标比例一致时，才可直接比较斜率。"
+      }
+    ]
+  },
+  {
+    "category": "driving",
+    "type": "交通工程指标",
+    "title": "85%位车速（85th percentile speed）",
+    "summary": "85%位车速是速度分布的第85百分位数，不是当前车速乘以85%。",
+    "tags": [
+      "85th percentile speed",
+      "速度分布",
+      "交通工程"
+    ],
+    "sections": [
+      {
+        "heading": "定义",
+        "body": "将观测车辆速度从低到高排序，第85百分位对应约85%的观测速度不超过该值、约15%高于该值。"
+      },
+      {
+        "heading": "用途",
+        "body": "常用于描述道路运行速度分布和速度管理，不代表每一辆车都应该以该速度行驶。"
+      }
+    ]
+  },
+  {
+    "category": "driving",
+    "type": "车辆动力学",
+    "title": "车辆纵向动力学：驱动力与阻力",
+    "summary": "车辆加速由轮端驱动力与滚阻、空气阻力、坡度阻力等共同决定。",
+    "formula": "ma = F_drive − F_resistance（简化形式）",
+    "tags": [
+      "纵向动力学",
+      "驱动力",
+      "阻力",
+      "加速度"
+    ],
+    "sections": [
+      {
+        "heading": "基本关系",
+        "body": "根据牛顿第二定律，合力等于质量乘加速度。驱动力超过总阻力时车辆加速；两者平衡时速度保持不变；阻力更大时车辆减速。"
+      },
+      {
+        "heading": "常见阻力",
+        "body": "包括滚动阻力、空气阻力和坡度阻力。空气阻力通常随相对空气速度平方增加，速度越高越显著。"
+      }
+    ]
   }
 ]
