@@ -1,0 +1,92 @@
+[
+  {
+    "category": "driving",
+    "type": "坐标与运动",
+    "title": "车辆坐标系中的 Pose 与 Yaw",
+    "summary": "Pose描述位置，Yaw描述绕竖直轴的航向角；必须明确参考坐标系和角度正方向。",
+    "tags": [
+      "坐标系",
+      "Pose",
+      "Yaw"
+    ],
+    "sections": [
+      {
+        "heading": "Pose",
+        "body": "在常见二维车辆平面表示中，Pose可包含纵向位置X和横向位置Y；在完整刚体位姿中还包括三维位置和姿态。"
+      },
+      {
+        "heading": "Yaw",
+        "body": "Yaw通常表示绕竖直轴的旋转角。相对Yaw可以是相对于某个参考时刻的累计角度，也可以是相邻时刻角度增量，必须看数据定义。"
+      },
+      {
+        "heading": "坐标变换",
+        "body": "把全局位姿转换到车辆局部坐标系时，需要考虑参考车辆姿态，不能简单地对全局X、Y分别作差。"
+      }
+    ],
+    "related": [
+      "旋转矩阵",
+      "Epona论文卡片"
+    ]
+  },
+  {
+    "category": "driving",
+    "type": "轨迹评价指标",
+    "title": "L2、ADE 与 FDE",
+    "summary": "L2描述单个时刻的位置误差；ADE是整个预测时域内逐点位置误差的平均；FDE是最后一个预测时刻的位置误差。",
+    "formula": "L2_t = √((x̂_t − x_t)² + (ŷ_t − y_t)²)",
+    "tags": [
+      "轨迹预测",
+      "评价指标",
+      "ADE",
+      "FDE"
+    ],
+    "sections": [
+      {
+        "heading": "单点L2",
+        "body": "在某一个预测时刻，预测位置与真实位置的欧氏距离。它不是平均值，除非明确对多个点再求平均。"
+      },
+      {
+        "heading": "ADE",
+        "body": "Average Displacement Error，对预测时域内各时刻的位置误差求平均。若有N个预测点，ADE = (1/N) Σ L2_t。"
+      },
+      {
+        "heading": "FDE",
+        "body": "Final Displacement Error，只计算最后一个预测点的位置误差。"
+      }
+    ],
+    "example": "1s、2s、3s对应的L2分别为0.54m、1.53m、2.41m时，3s L2是最后一个时刻误差；不能把它当作ADE。",
+    "related": [
+      "Pose与Yaw",
+      "Epona论文卡片"
+    ]
+  },
+  {
+    "category": "driving",
+    "type": "碰撞几何",
+    "title": "二维有向包围框（OBB）与分离轴定理（SAT）",
+    "summary": "OBB用带方向的矩形近似目标占用区域；SAT通过检查候选分离轴上的投影是否分离，判断两个凸多边形是否相交。",
+    "tags": [
+      "OBB",
+      "SAT",
+      "碰撞检测"
+    ],
+    "sections": [
+      {
+        "heading": "OBB是什么",
+        "body": "Oriented Bounding Box是有朝向的包围矩形。车辆通常用长、宽和航向角确定矩形的位置与方向，比忽略朝向的轴对齐包围框更贴近车辆外形。"
+      },
+      {
+        "heading": "SAT原理",
+        "body": "若存在一条轴，使两个凸多边形在该轴上的投影区间互不重叠，则二者不相交；若所有候选轴上的投影都重叠，则多边形相交。对矩形，通常检查双方边的法向轴。"
+      },
+      {
+        "heading": "使用限制",
+        "body": "碰撞判断依赖位置、尺寸、航向角、时间对齐和坐标变换。标注缺失或目标状态不确定时，不能简单当作无碰撞。"
+      }
+    ],
+    "related": [
+      "车辆坐标系",
+      "Collision Occurrence"
+    ]
+  }
+]
