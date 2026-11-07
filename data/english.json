@@ -2,12 +2,14 @@
   {
     "category": "english",
     "type": "论文阅读词汇",
-    "title": "trajectory",
+    "title": "trajectory：轨迹及论文相关术语",
     "summary": "名词：轨迹；指物体或系统随时间变化的位置路径。",
     "tags": [
       "名词",
       "自动驾驶",
-      "运动规划"
+      "运动规划",
+      "机器学习",
+      "高频词"
     ],
     "sections": [
       {
@@ -17,9 +19,22 @@
       {
         "heading": "论文语境",
         "body": "在自动驾驶论文中，trajectory通常指车辆或交通参与者在未来一段时间内的位置序列，可能同时包含朝向、速度等状态信息。"
+      },
+      {
+        "heading": "trajectory",
+        "body": "名词：轨迹。trajectory prediction（轨迹预测）、future trajectory（未来轨迹）。"
+      },
+      {
+        "heading": "inference",
+        "body": "名词：推理。model inference（模型推理）、inference time（推理时间）；与训练training相区别。"
+      },
+      {
+        "heading": "autoregressive",
+        "body": "形容词：自回归的。autoregressive generation（自回归生成），强调前一步输出会作为后续输入或条件。"
       }
     ],
-    "example": "The model predicts the future trajectory of the ego vehicle.（模型预测自车的未来轨迹。）"
+    "example": "The model predicts the future trajectory of the ego vehicle.（模型预测自车的未来轨迹。）",
+    "related": []
   },
   {
     "category": "english",
@@ -190,31 +205,6 @@
       {
         "heading": "正式邮件语境",
         "body": "We will endeavor to arrange a bilingual moderator. 表示我们将尽力安排双语主持人。语气正式、礼貌，但不保证一定实现。"
-      }
-    ]
-  },
-  {
-    "category": "english",
-    "type": "论文阅读词汇",
-    "title": "trajectory、inference、autoregressive",
-    "summary": "三个自动驾驶/AI论文高频词：轨迹、推理、自回归的。",
-    "tags": [
-      "自动驾驶",
-      "机器学习",
-      "高频词"
-    ],
-    "sections": [
-      {
-        "heading": "trajectory",
-        "body": "名词：轨迹。trajectory prediction（轨迹预测）、future trajectory（未来轨迹）。"
-      },
-      {
-        "heading": "inference",
-        "body": "名词：推理。model inference（模型推理）、inference time（推理时间）；与训练training相区别。"
-      },
-      {
-        "heading": "autoregressive",
-        "body": "形容词：自回归的。autoregressive generation（自回归生成），强调前一步输出会作为后续输入或条件。"
       }
     ]
   }
