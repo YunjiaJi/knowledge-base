@@ -1,0 +1,68 @@
+[
+  {
+    "category": "english",
+    "type": "论文阅读词汇",
+    "title": "trajectory",
+    "summary": "名词：轨迹；指物体或系统随时间变化的位置路径。",
+    "tags": [
+      "名词",
+      "自动驾驶",
+      "运动规划"
+    ],
+    "sections": [
+      {
+        "heading": "常见搭配",
+        "body": "trajectory prediction（轨迹预测）；future trajectory（未来轨迹）；planned trajectory（规划轨迹）；trajectory generation（轨迹生成）。"
+      },
+      {
+        "heading": "论文语境",
+        "body": "在自动驾驶论文中，trajectory通常指车辆或交通参与者在未来一段时间内的位置序列，可能同时包含朝向、速度等状态信息。"
+      }
+    ],
+    "example": "The model predicts the future trajectory of the ego vehicle.（模型预测自车的未来轨迹。）"
+  },
+  {
+    "category": "english",
+    "type": "论文阅读词汇",
+    "title": "inference",
+    "summary": "名词：推理；在机器学习中通常指使用训练好的模型对输入进行计算并产生输出。",
+    "tags": [
+      "名词",
+      "机器学习",
+      "模型部署"
+    ],
+    "sections": [
+      {
+        "heading": "常见搭配",
+        "body": "model inference（模型推理）；inference time（推理时间）；real-time inference（实时推理）；inference pipeline（推理流程）。"
+      },
+      {
+        "heading": "与training的区别",
+        "body": "Training是训练模型、更新参数；inference通常是使用已训练模型进行预测，不以更新模型参数为目的。"
+      }
+    ],
+    "example": "The model supports real-time inference.（该模型支持实时推理。）"
+  },
+  {
+    "category": "english",
+    "type": "论文阅读词汇",
+    "title": "autoregressive",
+    "summary": "形容词：自回归的；表示当前输出依赖先前输出或状态。",
+    "tags": [
+      "形容词",
+      "生成模型",
+      "序列建模"
+    ],
+    "sections": [
+      {
+        "heading": "常见搭配",
+        "body": "autoregressive model（自回归模型）；autoregressive generation（自回归生成）；autoregressive prediction（自回归预测）。"
+      },
+      {
+        "heading": "阅读提示",
+        "body": "看到autoregressive时，重点关注模型如何把前一步输出反馈为下一步输入，以及误差是否可能随时间累积。"
+      }
+    ],
+    "example": "The model generates future states in an autoregressive manner.（模型以自回归方式生成未来状态。）"
+  }
+]
