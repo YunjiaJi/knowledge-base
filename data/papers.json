@@ -34,5 +34,73 @@
       "Pose与Yaw",
       "OBB与SAT"
     ]
+  },
+  {
+    "category": "papers",
+    "type": "论文卡片",
+    "title": "Epona：视频生成与长时域轨迹预测/规划",
+    "summary": "围绕从历史观测生成未来视频和连续轨迹，关注多步预测、连续动作表示、时序解码和自回归推理。",
+    "tags": [
+      "Epona",
+      "World Model",
+      "Diffusion",
+      "NuPlan",
+      "NuScenes",
+      "Trajectory Prediction"
+    ],
+    "sections": [
+      {
+        "heading": "研究问题（基于已讨论论文段落的学习摘要）",
+        "body": "关注世界模型如何利用历史场景信息生成未来场景并预测未来轨迹，为长时域预测与规划提供基础。论文对比视频扩散方法与面向决策/规划的世界模型，强调因果动态、智能体交互、可变长度序列生成和实时规划的重要性。"
+      },
+      {
+        "heading": "已读到的核心机制",
+        "body": "（1）Multi-step vs. single-step：模型一次预测整个N步未来轨迹，而不是交替生成单帧图像与动作。（2）Continuous vs. discrete action representation：扩散模型直接生成连续轨迹，而不是把连续动作离散成token。（3）Temporal-aware DCAE Decoder：时序感知解码器用于改善视频帧间时间一致性。具体机制和实验结论应以论文全文为准。"
+      },
+      {
+        "heading": "代码复现中已核对的链路",
+        "body": "配置中vae='DCAE_f32c32'、vae_ckpt='pretrained/dcae_td_20000.pkl'、add_encoder_temporal=False、add_decoder_temporal=True、temporal_patch_size=6、num_sampling_steps=100。test_demo.py通过VAETokenizer编码历史图像、调用模型预测latent，再通过tokenizer.z_to_image解码。真实帧重建测试可用于区分解码器失真与预测latent失真。"
+      },
+      {
+        "heading": "当前实验设置与观察",
+        "body": "已对nuScenes场景进行轨迹复现，按5Hz（0.2s/点）评价3s、共15个未来点；比较A（一次性多点预测）与B（反复调用、取首个预测点并滚动更新的实现）。部分常规场景B的ADE更低，但video-2、video-6、video-9偏差较大；video-8停车场景视觉稳定。视觉失真和轨迹误差可能相互作用，单凭同步出现不能判定因果方向。"
+      },
+      {
+        "heading": "指标与风险评价",
+        "body": "已讨论L2、ADE、FDE、Yaw误差、Collision Occurrence、Collision Frame Ratio、Collision Rate、TTC及长时域风险。3秒窗口外的潜在碰撞应与3秒内碰撞分开报告；unknown表示目标时刻缺乏可依据的插值标注，不能简单当作无碰撞。"
+      },
+      {
+        "heading": "待核实事项",
+        "body": "当前记录不是论文全文的逐项复现审计。仍需核实论文正式引文、作者原始指标、DCAE消融表格的具体设置、训练与推理配置差异、作者模型的评测协议，以及当前A/B代码实现是否与论文方法完全一致。"
+      }
+    ],
+    "related": [
+      "DCAE与VAE",
+      "扩散采样步数",
+      "自回归生成",
+      "L2/ADE/FDE",
+      "OBB/SAT"
+    ]
+  },
+  {
+    "category": "papers",
+    "type": "论文阅读方法卡片",
+    "title": "论文阅读卡片应记录哪些维度",
+    "summary": "每篇论文独立建档，避免只保存摘要而丢失研究问题、方法、证据和个人理解。",
+    "tags": [
+      "论文阅读",
+      "文献管理",
+      "研究方法"
+    ],
+    "sections": [
+      {
+        "heading": "推荐字段",
+        "body": "论文标题与出处、研究领域、研究问题、核心假设、方法/模型架构、输入与输出、数据集、实验设置、评价指标、关键结果、消融实验、局限性、创新点、可复现性、与自己研究的关联、尚未理解的问题。"
+      },
+      {
+        "heading": "数据与图片",
+        "body": "保存关键表格/图时记录图号、原文页码、指标定义和上下文；注明是论文原图、个人重绘还是复现结果，避免把不同来源的数据混为一谈。"
+      }
+    ]
   }
 ]
