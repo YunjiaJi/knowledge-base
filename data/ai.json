@@ -339,5 +339,36 @@
         "body": "先从视频中选取历史帧，交给编码器提取潜在特征；世界模型基于这些特征和车辆运动条件生成下一步轨迹与视觉latent；最后将预测latent交给解码器，转换成驾驶场景图像。潜在特征的通道数量和空间大小由模型架构决定，不是随意改动后还能直接用于已训练模型的。"
       }
     ]
+  },
+  {
+    "category": "ai",
+    "type": "Python基础与Transformer",
+    "title": "self、Embedding、时间位置编码、因果掩码与张量重排",
+    "summary": "从Python对象属性到Epona时空Transformer：理解self、Embedding维度、time_emb_F、mask_time，以及时间/空间注意力前后的rearrange。",
+    "tags": [
+      "self",
+      "OOP",
+      "Embedding",
+      "Positional Encoding",
+      "time_emb",
+      "Causal Attention",
+      "Mask",
+      "rearrange",
+      "Epona"
+    ],
+    "sections": [
+      {
+        "heading": "一、基础代码含义与原理",
+        "body": "1）Python类与对象：class定义类，实例化得到对象；self是实例方法的第一个参数，约定指向当前对象。self.xxx表示当前对象的属性/方法；self不是Python关键字。__init__用于初始化对象属性。普通变量traj_len、配置对象args.traj_len、模型对象属性self.traj_len处于不同作用域/对象中。2）Embedding/向量表示：将离散ID、位置或其他输入映射为模型可计算的向量；不是把信息翻译成人类语言，而是学习到高维数值表示。向量维度C/hidden_size表示每个Token有多少个数值，不等于语义类别数。3）时间位置嵌入：Transformer需要区分序列顺序。可学习时间嵌入可为每个时间索引分配一个向量，加入该帧所有Token特征。nn.Parameter表示可训练参数。4）Attention Mask：掩码控制查询位置可以关注哪些键位置。因果掩码用0表示允许、负无穷表示屏蔽；加到注意力分数后，softmax(-inf)=0。下三角掩码允许当前时刻看当前和过去，不看未来。5）张量维度重排：rearrange只改变元素的组织/视图形状，不改变元素值或总元素数。对[B,F,L,C]，变成[B×L,F,C]是把每个batch里的每个Token位置作为一组，沿F帧做时间注意力；变成[B×F,L,C]是把每个batch的每一帧作为一组，沿L个Token做空间注意力。两种重排目的不同。6）3072不是通用Embedding固定值；它是某些模型配置可选的隐藏维度。需以实际配置为准。Epona当前配置中MST n_embd=2048、VisDiT n_embd_dit=2048、TrajDiT n_embd_dit_traj=1024；model.py注释中的origin:3072是原始参考值，不是当前配置实际值。"
+      },
+      {
+        "heading": "二、真实模型代码与基础示例",
+        "body": "【Python self示例】\nclass Car:\n    def __init__(self, brand, speed):\n        self.brand = brand\n        self.speed = speed\n    def drive(self):\n        print(self.brand, self.speed)\ncar1 = Car('BMW', 100)\ncar2 = Car('Tesla', 120)\n\n【Epona属性来源】\n# configs/dit_config_dcae_nuscenes.py\ntraj_len = 15\nn_embd = 2048\nn_embd_dit = 2048\nn_embd_dit_traj = 1024\n# models/model.py中的TrainTransformersDiT.__init__\nself.args = args\nself.traj_len = self.args.traj_len\n\n【Epona时间嵌入】\n# models/stt.py\nself.C = n_embd\nself.time_emb = nn.Parameter(torch.zeros(50, self.C))\nnn.init.normal_(self.time_emb.data, mean=0, std=0.02)\ntime_emb_F = self.time_emb[:F, :].unsqueeze(0)\ntime_emb_F = torch.repeat_interleave(time_emb_F[:, :, None, :], self.total_token_size, dim=2)\ntime_space_token_embeddings = yaw_pose_scale_token_embeddings + time_emb_F\n\n【Epona因果掩码】\nmatrix = torch.tril(torch.ones(condition_frames, condition_frames))\ntime_causal_mask = torch.where(matrix == 0, float('-inf'), matrix)\ntime_causal_mask = torch.where(matrix == 1, 0, time_causal_mask)\nself.mask_time = time_causal_mask.contiguous().cuda()\n\n【Epona时空Block重排】\n# models/stt.py / CausalTimeSpaceBlock.forward\nb, f, l, c = x.shape                 # x: [B,F,L,C]\nx = rearrange(x, 'b f l c -> (b l) f c')\nx = self.causal_time_block(x, attn_mask)  # [B*L,F,C]：逐Token跨帧\nx = rearrange(x, '(b l) f c -> (b f) l c', b=b, l=l, f=f)\nx = self.space_block(x)                    # [B*F,L,C]：逐帧跨Token\nx = rearrange(x, '(b f) l c -> b f l c', b=b, f=f)\n\n【evaluate末尾另一种重排】\nif sample_last:\n    time_space_token_embeddings = time_space_token_embeddings[:, -1:, :, :]\nauto_regressive_token_embeddings = rearrange(time_space_token_embeddings, 'B F L C -> (B F) L C')\n\n【教学形状示例】\n# B=1,F=2,L=3,C=2\n# [1,2,3,2] -> [1*3,2,2]=[3,2,2]：每个Token收集2帧\n# [3,2,2] -> [1*2,3,2]=[2,3,2]：每帧收集3个Token"
+      },
+      {
+        "heading": "三、代码的完整中文解释",
+        "body": "self是当前模型对象本身。Epona构造TrainTransformersDiT对象时，把配置对象保存为self.args，并把args.traj_len复制到self.traj_len，因此配置文件中的traj_len=15最终可通过self.traj_len访问。Embedding是数字向量表示；维度C代表每个Token向量的长度，不是把数据翻译成人类语言。Epona的SpatialTemporalTransformer把C设为n_embd；当前nuscenes配置中C=2048，而注释里的3072是原始参考配置。time_emb是形状[50,C]的可学习参数表，保存不同时间索引对应的向量。evaluate中取前F个时间向量，增加batch维，再沿Token维复制到total_token_size，使其与每帧所有图像/运动Token对齐。与融合特征相加时，时间向量被广播到每个batch，从而为各帧Token加入时间位置信息。mask_time由condition_frames×condition_frames的下三角矩阵构造；矩阵下三角（含对角线）变为0，上三角变为负无穷，因此第t帧只能关注第t帧及之前的帧。CausalTimeSpaceBlock先把[B,F,L,C]重排为[B×L,F,C]，让每个Token位置沿时间维做因果注意力；随后重排为[B×F,L,C]，让同一帧中的不同Token做空间注意力；最后恢复[B,F,L,C]。这三次重排没有改变数据总量，只改变分组方式。注意，evaluate末尾的[B,F,L,C]→[B×F,L,C]是另一处重排；sample_last=True时先只保留最后一帧，故[B,1,L,C]最终变为[B,L,C]，供后续模块使用。"
+      }
+    ]
   }
 ]
