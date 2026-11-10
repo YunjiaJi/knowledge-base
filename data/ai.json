@@ -166,30 +166,38 @@
   {
     "category": "ai",
     "type": "生成模型与扩散模型",
-    "title": "Diffusion sampling steps 与数据采样频率不是一回事",
-    "summary": "扩散采样步数表示生成时去噪迭代次数；视频帧率/轨迹采样频率表示真实时间轴上的采样密度。",
+    "title": "Flow Matching采样、迭代步数与数据采样频率",
+    "summary": "理解Flow Matching的速度场、Euler数值更新、图像与轨迹双分支生成，以及生成迭代次数和物理时间采样频率的区别。",
     "tags": [
       "Diffusion",
       "sampling steps",
       "帧率",
-      "采样频率"
+      "采样频率",
+      "Flow Matching",
+      "Rectified Flow",
+      "速度场",
+      "Euler Method",
+      "TrajDiT",
+      "VisDiT",
+      "图像生成",
+      "轨迹生成"
     ],
     "sections": [
       {
         "heading": "一、基础代码含义与原理",
-        "body": "扩散采样步数（Diffusion Sampling Steps）是模型生成一个样本时的去噪/流采样迭代次数；采样频率（Sampling Frequency，Hz）是物理时间轴上每秒采集多少帧或状态。两者是不同的时间尺度。"
+        "body": "1）生成模型的采样（Sampling）：推理时从初始噪声出发，反复调用已训练模型，根据每一步的预测更新当前生成状态，最后得到样本。Sampling在这里不是从数据集中抽取样本。\n2）Flow Matching（流匹配）：学习一个随状态和时间变化的向量场/速度场vθ(x,t)，使初始分布中的噪声沿连续路径流向目标数据分布。推理时求解常微分方程 dx/dt=vθ(x,t)。它是一类连续生成建模方法，不专属于图像，也可用于轨迹、动作等连续数据。\n3）Euler Method（欧拉法）：用当前点的导数近似一小段时间后的状态：x_next=x_current+Δt·vθ(x_current,t)。代码中的pred是当前状态、当前时间和条件下模型重新预测的速度场；每轮循环都会重新计算pred，不能把pred理解成固定不变。更新后的img/traj会成为下一轮模型的新输入。\n4）Flow Matching与传统扩散模型有关联，但不应把两者的训练目标、时间参数化、采样公式都视为完全相同。Epona所示sample循环使用速度场预测和Euler式更新，宜称为基于Flow Matching/Rectified Flow风格的采样实现，而不是笼统说成经典DDPM逐步去噪公式。\n5）生成对象可不同：图像分支更新图像潜在表示img/latent；轨迹分支更新traj。两者都可以使用Flow Matching，区别在于数据空间、网络、条件和输出语义。\n6）采样迭代次数num_sampling_steps与数据采样频率Hz不同。前者描述生成一次样本时数值求解/模型更新多少步；后者描述真实视频或轨迹每秒采集多少个时间点。traj_len是输出轨迹点数，也不是采样迭代次数或秒数。"
       },
       {
-        "heading": "二、真实模型代码或可运行示例",
-        "body": "num_sampling_steps=100 # 生成一次的迭代步数\ndownsample_fps=10 # 数据时间轴每秒10帧（以配置为准）\n# 若某评价数据实际以5Hz采样：\ndt=1/5 # 0.2秒/帧\nhorizon=15*dt # 15个时间间隔对应3秒"
+        "heading": "二、真实模型代码与基础示例",
+        "body": "【Epona图像分支：models/flux_dit.py】\nfor t_curr, t_prev in zip(timesteps[:-1], timesteps[1:]):\n    t_vec = torch.full((img.shape[0],), t_curr, dtype=img.dtype, device=img.device)\n    pred = self(img=img, img_ids=img_ids, cond=cond, cond_ids=cond_ids, y=vec, timesteps=t_vec)\n    img = img + (t_prev - t_curr) * pred\nreturn img\n\n【Epona轨迹分支：models/traj_dit.py】\nfor t_curr, t_prev in zip(timesteps[:-1], timesteps[1:]):\n    t_vec = torch.full((traj.shape[0],), t_curr, dtype=traj.dtype, device=traj.device)\n    pred = self(traj=traj, traj_ids=traj_ids, cond=cond, cond_ids=cond_ids, timesteps=t_vec)\n    traj = traj + (t_prev - t_curr) * pred\nreturn traj\n\n【最小教学例子】\nx = 10.0\ntimesteps = [0.0, 0.25, 0.5]\nfor t_curr, t_next in zip(timesteps[:-1], timesteps[1:]):\n    pred = model(x, t_curr)       # 每轮重新预测速度场\n    x = x + (t_next - t_curr) * pred\n\n【采样步数与物理时间】\nnum_sampling_steps = 100  # 生成过程的迭代更新次数（具体循环次数由时间表长度决定）\ntraj_len = 15             # 未来轨迹点数\nfps = 5                   # 若评测轨迹按5Hz采样，点间隔0.2秒\nhorizon = 15 * 0.2         # 若15点按15个间隔计，约3秒；若首点时间定义不同需核对协议"
       },
       {
         "heading": "三、代码的完整中文解释",
-        "body": "100不表示100帧视频，而是生成过程中的100次采样迭代；10Hz表示每秒10个数据时间点，5Hz表示每秒5个数据时间点。必须区分配置文件中的采样率与某次实验实际评估采样率。"
+        "body": "图像分支的sample()从img初始噪声开始；每轮取当前采样时间t_curr，构造批次时间向量t_vec，再调用当前DiT的forward（通过self(...)）预测速度场pred。随后用时间间隔(t_prev-t_curr)乘以pred，更新img。下一轮使用更新后的img重新预测pred，直到时间表遍历完成。轨迹分支完全类似，只是状态变量换成traj，网络换成TrajDiT，生成对象换成未来轨迹。因此Epona不是只有图像生成才使用Flow Matching：轨迹和图像潜在表示两个分支都采用这种速度场迭代更新形式。pred不是固定常数，也不是车辆真实速度；它是生成状态空间中的向量场预测。"
       },
       {
-        "heading": "补充知识、易错点与原有笔记",
-        "body": "扩散采样步数：例如num_sampling_steps=100，通常表示从噪声到生成结果执行100次左右的去噪迭代。它影响生成计算量和生成质量，不等于读取100帧视频。\n\n数据采样频率：5Hz表示每秒5个时间点，时间间隔0.2s；10Hz表示每秒10个时间点，时间间隔0.1s。它描述真实场景的时间采样。\n\n两者关系：扩散采样步数影响单个样本的生成过程；数据采样频率影响模型输入/输出的时间分辨率。二者可以同时影响系统表现，但含义不同。"
+        "heading": "四、易错点与延伸知识",
+        "body": "1）self(...)在继承torch.nn.Module的模型中会触发模块调用机制，通常进入forward()，不等于pred是一个预先定义好的常量。\n2）变量名img容易让人误以为是RGB图像；在DiT采样阶段通常是图像Latent/Token张量，最终还需Decoder解码。\n3）traj也不是一个标量，而是包含整段未来轨迹的张量；每次Euler更新通常对张量所有元素进行更新。\n4）如果timesteps有N+1个边界点，zip(timesteps[:-1],timesteps[1:])通常产生N对相邻时间点，即N次更新。\n5）代码变量名t_curr、t_prev/t_next由作者命名；从配对顺序看第二个值是时间表中的下一个节点，不必按英文prev字面误解为更早时间。\n6）Euler步长变小通常意味着更多迭代可更细致地近似连续流，但生成质量、速度和稳定性还取决于模型、时间调度与数值求解误差，不能仅凭步数断言质量必然提高。\n7）Epona配置中的traj_len、num_sampling_steps、downsample_fps分别控制输出轨迹序列长度、生成迭代调度和数据时间采样频率，需分别查配置与实际评测协议。"
       }
     ]
   },
