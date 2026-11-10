@@ -10,7 +10,13 @@
       "Diffusion",
       "NuPlan",
       "Epona",
-      "NuScenes"
+      "NuScenes",
+      "Flow Matching",
+      "Rectified Flow",
+      "TrajDiT",
+      "VisDiT",
+      "Velocity Field",
+      "Euler Sampling"
     ],
     "sections": [
       {
@@ -52,6 +58,18 @@
       {
         "heading": "待核实事项",
         "body": "当前记录不是论文全文的逐项复现审计。仍需核实论文正式引文、作者原始指标、DCAE消融表格的具体设置、训练与推理配置差异、作者模型的评测协议，以及当前A/B代码实现是否与论文方法完全一致。"
+      },
+      {
+        "heading": "Flow Matching：轨迹与视觉生成的双分支（源码核对）",
+        "body": "Epona的推理中，轨迹和图像潜在表示都使用迭代采样。models/traj_dit.py的TrajDiT.sample()对traj执行：pred=self(traj=..., timesteps=t_vec)，然后traj=traj+(t_prev-t_curr)*pred。models/flux_dit.py的FluxDiT/视觉分支sample()对img执行同样结构：pred=self(img=..., y=vec, timesteps=t_vec)，然后img=img+(t_prev-t_curr)*pred。两者都是根据当前状态和时间重新预测速度场，再用Euler式更新；pred每轮都会重新计算，不是固定不变。两分支初始噪声、模型参数、数据空间和条件输入不同，不能理解为共用同一个噪声或同一个模型。"
+      },
+      {
+        "heading": "两个分支的输入、输出与先后关系",
+        "body": "轨迹分支：初始noise_traj、轨迹位置索引traj_ids、历史条件stt_features、条件索引cond_ids和timesteps_traj输入TrajDiT，输出predict_traj；其张量表示一组未来轨迹点，每个点的特征维由项目配置定义（当前讨论的配置为X、Y、Yaw三个量）。视觉分支：初始noise、图像位置索引img_ids、历史条件cond/stt_features、条件索引cond_ids、位姿条件vec/pose_emb及timesteps输入FluxDiT，输出图像Latent。step_eval中的执行存在依赖：先预测轨迹，再取第一预测点的Pose/Yaw形成视觉条件，随后生成下一帧图像Latent；因此不是两个分支完全并行、也不是生成15帧图像与15个轨迹点逐点一一对应。最终Latent还需交给DCAE解码器还原图像。"
+      },
+      {
+        "heading": "术语辨析与复现注意事项",
+        "body": "Flow Matching是生成建模方法；sample()是推理采样函数；pred是模型在当前采样状态和时间下预测的向量场；Euler更新是数值积分方法。三者不是同一个概念。Flow Matching不只用于图像，也可用于轨迹、动作等连续变量。项目源码的sample循环体现速度场预测与Euler式状态更新；训练目标与完整理论需结合对应训练代码和论文，不应仅凭sample()推断全部训练细节。"
       }
     ],
     "related": [
